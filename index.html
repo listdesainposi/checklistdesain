@@ -73,6 +73,8 @@ button.btn{font:inherit;font-weight:700;font-size:14px;padding:12px 20px;border-
 .confirm .b{display:flex;gap:8px}
 .confirm button{font:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:9px;border:0;cursor:pointer}
 .confirm .y{background:var(--bad);color:#fff}.confirm .n{background:var(--card);color:var(--ink)}
+.confirm.info{background:var(--pri-soft);color:var(--pri);margin:0 0 16px}
+.confirm.info .y{background:var(--pri)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:9}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -105,7 +107,12 @@ button.btn{font:inherit;font-weight:700;font-size:14px;padding:12px 20px;border-
       <h1>Checklist <span>Desain Kompetisi</span></h1>
       <div class="sub">Pantau kelengkapan desain & dokumen sebelum hari-H.</div>
     </div>
+    <button class="btn save" id="newComp" style="flex:none">➕ Kompetisi Baru</button>
   </header>
+  <div class="confirm info" id="confirmNew">
+    <span>Mulai kompetisi baru? Progres saat ini otomatis diarsipkan ke riwayat (jika ada isinya), lalu form dikosongkan.</span>
+    <span class="b"><button class="n" id="newNo">Batal</button><button class="y" id="newYes">Ya, mulai baru</button></span>
+  </div>
 
   <div class="grid">
     <!-- KIRI: checklist -->
@@ -313,6 +320,31 @@ $("hist").addEventListener("click",e=>{
     persist(); renderList(); renderProgress(); toast("Riwayat dimuat ke checklist");
     window.scrollTo({top:0,behavior:"smooth"});
   }
+});
+
+$("newComp").addEventListener("click",()=>$("confirmNew").classList.add("show"));
+$("newNo").addEventListener("click",()=>$("confirmNew").classList.remove("show"));
+$("newYes").addEventListener("click",()=>{
+  $("confirmNew").classList.remove("show");
+  const done = count(), total = ITEMS.length;
+  let entry = null;
+  if(state.nama.trim() || done>0){
+    entry = {
+      id: Date.now(), nama: state.nama.trim(), tgl: state.tgl,
+      checked: Object.assign({}, state.checked),
+      done, total, percent: Math.round(done/total*100),
+      savedAt: new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})
+    };
+    state.history.unshift(entry);
+  }
+  state.nama = ""; state.tgl = ""; state.checked = {};
+  $("nama").value = ""; $("tgl").value = "";
+  filter = "all";
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f==="all"));
+  persist(); renderList(); renderProgress(); renderHistory();
+  if(entry && apiReady()) api({action:"add",entry}).catch(()=>toast("Gagal menyimpan arsip ke Spreadsheet"));
+  toast(entry ? "Progres lama diarsipkan, kompetisi baru dimulai" : "Kompetisi baru dimulai");
+  $("nama").focus();
 });
 
 load();
