@@ -37,7 +37,7 @@ h1 em{font-style:normal;color:var(--accent)}
 .tab.new{margin-left:auto;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .meta{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:16px}
 @media(max-width:560px){.meta{grid-template-columns:1fr}}
-input[type=text],input[type=date],select,textarea{
+input[type=text],input[type=password],input[type=date],select,textarea{
   font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);
   border-radius:10px;padding:10px 12px;width:100%;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
@@ -121,11 +121,15 @@ textarea{resize:vertical;min-height:40px}
 <div class="wrap">
   <div class="topbar">
     <div class="eyebrow">Divisi Desain Grafis</div>
-    <div class="sync" id="sync" data-s="loading"><span class="dot"></span><span id="syncTxt">Menghubungkan ke Google Sheets…</span><span id="who"></span><button class="icon-btn" id="reload" type="button" title="Muat ulang dari Spreadsheet" aria-label="Muat ulang" style="width:28px;height:28px">↻</button></div>
+    <div class="sync" id="sync" data-s="loading"><span class="dot"></span><span id="syncTxt">Menghubungkan ke Google Sheets…</span><span id="who"></span><button class="icon-btn" id="reload" type="button" title="Muat ulang dari Spreadsheet" aria-label="Muat ulang" style="width:28px;height:28px">↻</button><button class="icon-btn" id="logout" type="button" title="Keluar (hapus kode akses di browser ini)" aria-label="Keluar" style="width:28px;height:28px">⎋</button></div>
   </div>
   <h1>Checklist <em>Kebutuhan Desain</em> Event</h1>
 
   <div class="loading" id="loading">Memuat data kompetisi…</div>
+  <form class="add" id="gate" hidden style="justify-content:center;max-width:420px;margin:0 auto 30px">
+    <input type="password" id="codeIn" placeholder="Kode akses" autocomplete="off" aria-label="Kode akses">
+    <button class="btn" type="submit">Masuk</button>
+  </form>
 
   <div id="app" hidden>
     <div class="tabs" role="tablist">
@@ -285,18 +289,30 @@ textarea{resize:vertical;min-height:40px}
       remove:function(id){delete data[id];persist();return Promise.resolve();}
     };
   }
-  function gas(name){
-    var args=[].slice.call(arguments,1);
-    return new Promise(function(res,rej){
-      var r=google.script.run.withSuccessHandler(res).withFailureHandler(rej);
-      r[name].apply(r,args);
+  var APP_URL='https://script.google.com/macros/s/AKfycbzzacRirTHoqMbY6MwplqJAjkEHrTflLVJt0jAh2P7W7SaqHtVSaSL7bKArDs9-izKQ/exec';
+  var memCode='';
+  function getCode(){try{return localStorage.getItem('cdev-code')||memCode;}catch(e){return memCode;}}
+  function setCode(c){memCode=c;try{if(c)localStorage.setItem('cdev-code',c);else localStorage.removeItem('cdev-code');}catch(e){}}
+  function inScript(){return !!(window.google&&google.script&&google.script.run);}
+  // Satu pintu ke Apps Script: lewat google.script.run (di dalam Apps Script) atau fetch ke APP_URL (di luar).
+  function call(action,payload){
+    var req={code:getCode(),action:action,payload:payload};
+    var p;
+    if(inScript()){
+      p=new Promise(function(res,rej){google.script.run.withSuccessHandler(res).withFailureHandler(rej).rpc(req);});
+    }else{
+      p=fetch(APP_URL,{method:'POST',body:JSON.stringify(req)}).then(function(r){return r.json();});
+    }
+    return p.then(function(j){
+      if(!j||!j.ok)throw new Error((j&&j.error)||'Respons tidak valid dari Apps Script');
+      return j.data;
     });
   }
   function sheetsStore(){
     return {
-      subscribe:function(cb,err){gas('loadAll').then(cb,err);return function(){};},
-      save:function(id,obj){return gas('saveEvent',obj);},
-      remove:function(id){return gas('deleteEvent',id);}
+      subscribe:function(cb,err){call('loadAll').then(cb,err);return function(){};},
+      save:function(id,obj){return call('saveEvent',obj);},
+      remove:function(id){return call('deleteEvent',id);}
     };
   }
 
@@ -445,7 +461,6 @@ textarea{resize:vertical;min-height:40px}
     loadEventIntoForm();openIds={};renderAll();scheduleSave(copy.id);$('evName').focus();toast('Kompetisi diduplikat, status direset');
   });
 
-  var APP_URL='https://script.google.com/macros/s/AKfycbzzacRirTHoqMbY6MwplqJAjkEHrTflLVJt0jAh2P7W7SaqHtVSaSL7bKArDs9-izKQ/exec';
   $('saveBtn').addEventListener('click',function(){
     var ev=curEv();
     if(!(ev.name||'').trim()){toast('Isi nama kompetisi dulu');$('evName').focus();return;}
@@ -483,21 +498,43 @@ textarea{resize:vertical;min-height:40px}
 
   /* ---------- boot ---------- */
   function errMsg(e){return (e&&e.message)?String(e.message).replace(/^Error:\s*/,''):'terjadi kesalahan';}
+  function needsCode(m){return /kode akses|ACCESS_CODES/i.test(m);}
+  function showGate(msg){
+    $('app').hidden=true;$('loading').hidden=false;$('loading').textContent=msg||'Masukkan kode akses untuk membuka data.';
+    $('gate').hidden=false;setSync('error','Perlu kode akses');$('codeIn').focus();
+  }
+  var whoShown=false;
   function start(st,m){
     store=st;mode=m;
-    st.subscribe(function(list){onData(list);},function(e){
-      $('loading').textContent='Gagal memuat: '+errMsg(e);setSync('error','Gagal terhubung ke Spreadsheet');
+    st.subscribe(function(list){
+      onData(list);
+      if(m==='cloud'&&!whoShown){whoShown=true;call('ping').then(function(r){$('who').textContent=' · '+r.owner;},function(){});}
+    },function(e){
+      var msg=errMsg(e);
+      if(needsCode(msg)){setCode('');showGate(msg);}
+      else{$('loading').hidden=false;$('loading').textContent='Gagal memuat: '+msg;setSync('error','Gagal terhubung ke Spreadsheet');}
     });
     if(m==='local')setSync('local');
   }
-  if(window.google&&google.script&&google.script.run){
+  function connect(){
+    $('gate').hidden=true;$('loading').hidden=false;$('loading').textContent='Menghubungkan ke Google Sheets…';
+    setSync('loading');whoShown=false;ready=false;
     start(sheetsStore(),'cloud');
-    gas('me').then(function(m){$('who').textContent=' · '+m;},function(){});
-    $('reload').addEventListener('click',function(){
-      gas('loadAll').then(function(l){onData(l);toast('Data dimuat ulang dari Spreadsheet');},function(e){toast('Gagal memuat: '+errMsg(e));});
-    });
+  }
+  $('gate').addEventListener('submit',function(e){
+    e.preventDefault();var v=$('codeIn').value.trim();if(!v)return;
+    setCode(v);$('codeIn').value='';connect();
+  });
+  $('logout').addEventListener('click',function(){setCode('');S.events={};S.draft=null;S.cur=null;ready=false;showGate('Kamu sudah keluar. Masukkan kode akses untuk masuk lagi.');});
+  $('reload').addEventListener('click',function(){
+    if(mode!=='cloud')return;
+    call('loadAll').then(function(l){onData(l);toast('Data dimuat ulang dari Spreadsheet');},function(e){toast('Gagal memuat: '+errMsg(e));});
+  });
+  var remote=inScript()||/^https:\/\/script\.google\.com\//.test(APP_URL);
+  if(remote){
+    if(getCode())connect();else showGate();
   }else{
-    $('reload').hidden=true;
+    $('reload').hidden=true;$('logout').hidden=true;
     start(localStore(),'local');
   }
 })();
