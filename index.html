@@ -83,6 +83,10 @@ ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px
 .item.open .detail{display:grid}
 @media(max-width:560px){.detail{grid-template-columns:1fr}}
 textarea{resize:vertical;min-height:40px}
+.row2{grid-column:1/-1;display:grid;grid-template-columns:1fr 170px;gap:10px}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
+.savebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:-4px 0 16px}
+.savebar .hint{margin:0}
 .del{grid-column:1/-1;justify-self:end;font:inherit;font-size:12px;color:#d33;background:none;border:none;cursor:pointer;padding:0}
 .deadline-badge{font-size:12px;color:var(--muted)}
 .deadline-badge.late{color:#d33;font-weight:600}
@@ -117,24 +121,28 @@ textarea{resize:vertical;min-height:40px}
 <div class="wrap">
   <div class="topbar">
     <div class="eyebrow">Divisi Desain Grafis</div>
-    <div class="sync" id="sync" data-s="loading"><span class="dot"></span><span id="syncTxt">Menghubungkan ke akun…</span></div>
+    <div class="sync" id="sync" data-s="loading"><span class="dot"></span><span id="syncTxt">Menghubungkan ke Google Sheets…</span><span id="who"></span><button class="icon-btn" id="reload" type="button" title="Muat ulang dari Spreadsheet" aria-label="Muat ulang" style="width:28px;height:28px">↻</button></div>
   </div>
   <h1>Checklist <em>Kebutuhan Desain</em> Event</h1>
 
-  <div class="loading" id="loading">Memuat data kegiatan…</div>
+  <div class="loading" id="loading">Memuat data kompetisi…</div>
 
   <div id="app" hidden>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tabCheck" aria-selected="true">Checklist</button>
-      <button class="tab" role="tab" id="tabHist" aria-selected="false">Riwayat kegiatan (<span id="histN">0</span>)</button>
-      <button class="tab new" id="newEv" type="button">+ Kegiatan baru</button>
+      <button class="tab" role="tab" id="tabHist" aria-selected="false">Riwayat kompetisi (<span id="histN">0</span>)</button>
+      <button class="tab new" id="newEv" type="button">+ Kompetisi baru</button>
     </div>
 
     <!-- ====== VIEW: CHECKLIST ====== -->
     <section id="vCheck">
       <div class="meta">
-        <div><label class="lbl" for="evName">Nama kegiatan</label><input type="text" id="evName" placeholder="Contoh: Olimpiade Sains 2026"></div>
-        <div><label class="lbl" for="evDate">Tanggal kegiatan</label><input type="date" id="evDate"></div>
+        <div><label class="lbl" for="evName">Nama kompetisi</label><input type="text" id="evName" placeholder="Contoh: Olimpiade Sains 2026"></div>
+        <div><label class="lbl" for="evDate">Tanggal kompetisi</label><input type="date" id="evDate"></div>
+      </div>
+      <div class="savebar">
+        <button class="btn" id="saveBtn" type="button">💾 Simpan kompetisi</button>
+        <span class="hint" id="saveHint">Perubahan juga tersimpan otomatis. Semua bisa diedit kapan saja dari tab Riwayat.</span>
       </div>
 
       <section class="progress-card" aria-live="polite">
@@ -170,26 +178,19 @@ textarea{resize:vertical;min-height:40px}
       </form>
 
       <div class="foot">
-        <button class="btn ghost" id="copyBtn" type="button">Salin untuk Google Sheets</button>
-        <button class="btn ghost" id="dupBtn" type="button">Duplikat kegiatan</button>
+        <button class="btn ghost" id="dupBtn" type="button">Duplikat kompetisi</button>
+        <button class="btn ghost" id="linkBtn" type="button">Salin link aplikasi</button>
         <button class="btn ghost" id="uncheckBtn" type="button">Reset status</button>
-        <button class="btn ghost danger" id="delEvBtn" type="button">Hapus kegiatan</button>
+        <button class="btn ghost danger" id="delEvBtn" type="button">Hapus kompetisi</button>
       </div>
     </section>
 
     <!-- ====== VIEW: RIWAYAT ====== -->
     <section id="vHist" hidden>
       <div class="grid" id="histGrid"></div>
-      <div class="empty" id="histEmpty" style="display:block">Belum ada kegiatan tersimpan.</div>
-      <div class="foot">
-        <button class="btn ghost" id="copyAllBtn" type="button">Salin semua kegiatan untuk Google Sheets</button>
-      </div>
+      <div class="empty" id="histEmpty" style="display:block">Belum ada kompetisi tersimpan.</div>
     </section>
 
-    <div class="export" id="export">
-      <label class="lbl" for="exportText">Salin teks di bawah (Ctrl/Cmd + C), lalu tempel di Google Sheets sel A1</label>
-      <textarea id="exportText" readonly></textarea>
-    </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -225,8 +226,8 @@ textarea{resize:vertical;min-height:40px}
   var mode='loading';
   function setSync(s,msg){
     var el=$('sync'); el.setAttribute('data-s',s);
-    var txt={loading:'Menghubungkan ke akun…',saved:'Tersimpan di akunmu',saving:'Menyimpan…',
-      local:'Belum masuk — data hanya di browser ini',error:'Gagal menyimpan — coba lagi'}[s];
+    var txt={loading:'Menghubungkan ke Google Sheets…',saved:'Tersimpan di Google Sheets',saving:'Menyimpan…',
+      local:'Mode lokal — data hanya di browser ini',error:'Gagal menyimpan — coba lagi'}[s];
     $('syncTxt').textContent=msg||txt;
   }
 
@@ -267,7 +268,7 @@ textarea{resize:vertical;min-height:40px}
       if(pending[id]){pending[id]=false;flush(id);}
       else if(!timers[id]){setSync(mode==='local'?'local':'saved');}
     },function(e){
-      inflight[id]=false; setSync('error');
+      inflight[id]=false; setSync('error','Gagal menyimpan: '+errMsg(e));
     });
   }
   function setLast(id){try{localStorage.setItem('cdev-last',id);}catch(e){}}
@@ -284,16 +285,18 @@ textarea{resize:vertical;min-height:40px}
       remove:function(id){delete data[id];persist();return Promise.resolve();}
     };
   }
-  function cloudStore(db,userId){
-    var col=db.collection('data/users/'+userId);
+  function gas(name){
+    var args=[].slice.call(arguments,1);
+    return new Promise(function(res,rej){
+      var r=google.script.run.withSuccessHandler(res).withFailureHandler(rej);
+      r[name].apply(r,args);
+    });
+  }
+  function sheetsStore(){
     return {
-      subscribe:function(cb,err){
-        return col.onSnapshot(function(snap){
-          cb(snap.docs.map(function(d){return {id:d.id,data:d.data()};}));
-        },err);
-      },
-      save:function(id,obj){return col.doc(id).set(obj);},
-      remove:function(id){return col.doc(id).delete();}
+      subscribe:function(cb,err){gas('loadAll').then(cb,err);return function(){};},
+      save:function(id,obj){return gas('saveEvent',obj);},
+      remove:function(id){return gas('deleteEvent',id);}
     };
   }
 
@@ -356,9 +359,11 @@ textarea{resize:vertical;min-height:40px}
         '<div class="right"><select class="status" data-s="'+esc(it.status)+'" aria-label="Status '+esc(it.name)+'">'+
         Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(k===it.status?' selected':'')+'>'+STATUS[k]+'</option>';}).join('')+
         '</select><button class="icon-btn toggle" type="button" aria-label="Detail" title="Tenggat & catatan">⋯</button></div>'+
-        '<div class="detail"><div><label class="lbl">Tenggat</label><input type="date" class="dl" value="'+esc(it.deadline)+'"></div>'+
+        '<div class="detail"><div class="row2"><div><label class="lbl">Nama item</label><input type="text" class="iname" value="'+esc(it.name)+'" maxlength="120"></div>'+
+        '<div><label class="lbl">Jenis</label><select class="itag">'+['cetak','digital','dokumen'].map(function(k){return '<option value="'+k+'"'+(k===it.tag?' selected':'')+'>'+k.charAt(0).toUpperCase()+k.slice(1)+'</option>';}).join('')+'</select></div></div>'+
+        '<div><label class="lbl">Tenggat</label><input type="date" class="dl" value="'+esc(it.deadline)+'"></div>'+
         '<div><label class="lbl">Catatan (ukuran, revisi, link file…)</label><textarea class="note" rows="2">'+esc(it.note)+'</textarea></div>'+
-        (it.custom?'<button class="del" type="button">Hapus item ini</button>':'')+
+        '<button class="del" type="button">Hapus item ini</button>'+
         '</div></li>';
     });
     $('list').innerHTML=html;
@@ -371,7 +376,7 @@ textarea{resize:vertical;min-height:40px}
     $('histGrid').innerHTML=a.map(function(ev){
       var c=counts(ev),n=ev.items.length,p=n?Math.round(c.selesai/n*100):0;
       return '<button class="ev'+(ev.id===S.cur?' cur':'')+'" data-id="'+esc(ev.id)+'" type="button">'+
-        '<h3>'+esc(ev.name||'Kegiatan tanpa nama')+'</h3>'+
+        '<h3>'+esc(ev.name||'Kompetisi tanpa nama')+'</h3>'+
         '<small>'+(ev.date?'Acara: '+fmt(ev.date)+' · ':'')+'Diubah '+fmtTs(ev.updatedAt)+'</small>'+
         '<div class="mini"><i style="width:'+p+'%"></i></div>'+
         '<small>'+c.selesai+'/'+n+' selesai · '+p+'%</small></button>';
@@ -382,7 +387,6 @@ textarea{resize:vertical;min-height:40px}
     $('vCheck').hidden=v!=='check';$('vHist').hidden=v!=='hist';
     $('tabCheck').setAttribute('aria-selected',v==='check');
     $('tabHist').setAttribute('aria-selected',v==='hist');
-    $('export').style.display='none';
     if(v==='hist')renderHist();
   }
   function openEvent(id){
@@ -397,12 +401,16 @@ textarea{resize:vertical;min-height:40px}
     if(e.target.classList.contains('check'))it.status=e.target.checked?'selesai':'belum';
     else if(e.target.classList.contains('status'))it.status=e.target.value;
     else if(e.target.classList.contains('dl'))it.deadline=e.target.value;
+    else if(e.target.classList.contains('itag'))it.tag=e.target.value;
     else return;
     touch();renderProgress();renderList();renderHist();
   });
   $('list').addEventListener('input',function(e){
-    if(!e.target.classList.contains('note'))return;
-    var li=e.target.closest('.item');findItem(li.dataset.id).note=e.target.value;touch();
+    var li=e.target.closest('.item');if(!li)return;
+    if(e.target.classList.contains('note')){findItem(li.dataset.id).note=e.target.value;touch();}
+    else if(e.target.classList.contains('iname')){
+      var v=e.target.value;findItem(li.dataset.id).name=v;li.querySelector('.name').textContent=v;touch();
+    }
   });
   $('list').addEventListener('click',function(e){
     var li=e.target.closest('.item');if(!li)return;var it=findItem(li.dataset.id);
@@ -427,14 +435,28 @@ textarea{resize:vertical;min-height:40px}
   $('tabHist').addEventListener('click',function(){showView('hist');});
   $('histGrid').addEventListener('click',function(e){var b=e.target.closest('.ev');if(b)openEvent(b.dataset.id);});
   $('newEv').addEventListener('click',function(){
-    // Draft stays in memory until the first edit, so empty kegiatan are never saved.
+    // Draft stays in memory until the first edit, so empty kompetisi are never saved.
     if(S.draft&&!S.events[S.draft.id]){S.draft=newEventObj();} else {S.draft=newEventObj();}
     S.cur=S.draft.id;filter='semua';query='';$('q').value='';openIds={};
     loadEventIntoForm();renderAll();showView('check');$('evName').focus();
   });
   $('dupBtn').addEventListener('click',function(){
     var copy=newEventObj(curEv());S.events[copy.id]=copy;S.cur=copy.id;setLast(copy.id);
-    loadEventIntoForm();openIds={};renderAll();scheduleSave(copy.id);$('evName').focus();toast('Kegiatan diduplikat, status direset');
+    loadEventIntoForm();openIds={};renderAll();scheduleSave(copy.id);$('evName').focus();toast('Kompetisi diduplikat, status direset');
+  });
+
+  var APP_URL='https://script.google.com/macros/s/AKfycbzzacRirTHoqMbY6MwplqJAjkEHrTflLVJt0jAh2P7W7SaqHtVSaSL7bKArDs9-izKQ/exec';
+  $('saveBtn').addEventListener('click',function(){
+    var ev=curEv();
+    if(!(ev.name||'').trim()){toast('Isi nama kompetisi dulu');$('evName').focus();return;}
+    touch();
+    clearTimeout(timers[ev.id]);timers[ev.id]=null;
+    flush(ev.id);renderHist();
+    toast(mode==='cloud'?'Kompetisi disimpan ke Google Sheets':'Kompetisi disimpan');
+  });
+  $('linkBtn').addEventListener('click',function(){
+    var done=function(){toast('Link aplikasi disalin');};
+    try{navigator.clipboard.writeText(APP_URL).then(done,function(){toast(APP_URL);});}catch(e){toast(APP_URL);}
   });
 
   var armed={};
@@ -446,7 +468,7 @@ textarea{resize:vertical;min-height:40px}
     });
   }
   twoStep($('uncheckBtn'),'Reset status',function(){curEv().items.forEach(function(i){i.status='belum';});touch();renderAll();toast('Status direset');});
-  twoStep($('delEvBtn'),'Hapus kegiatan',function(){
+  twoStep($('delEvBtn'),'Hapus kompetisi',function(){
     var id=S.cur,wasSaved=!!S.events[id];
     clearTimeout(timers[id]);timers[id]=null;pending[id]=false;
     if(S.draft&&S.draft.id===id)S.draft=null;
@@ -454,52 +476,30 @@ textarea{resize:vertical;min-height:40px}
     var go=function(){
       var a=allEvents();
       if(a.length)S.cur=a[0].id;else{S.draft=newEventObj();S.cur=S.draft.id;}
-      loadEventIntoForm();renderAll();toast('Kegiatan dihapus');
+      loadEventIntoForm();renderAll();toast('Kompetisi dihapus');
     };
     if(wasSaved)store.remove(id).then(go,function(){setSync('error');}); else go();
   });
 
-  /* ---------- export to Google Sheets (paste as table) ---------- */
-  function cell(v){return String(v==null?'':v).replace(/[\t\r\n]+/g,' ');}
-  function rowsFor(ev){
-    return ev.items.map(function(i){
-      return [ev.name,ev.date,i.name,i.tag,STATUS[i.status]||i.status,i.deadline,i.note].map(cell).join('\t');
-    });
-  }
-  var HEAD=['Kegiatan','Tanggal kegiatan','Item desain','Jenis','Status','Tenggat','Catatan'].join('\t');
-  function giveText(txt){
-    $('exportText').value=txt;
-    var ok=false;
-    try{navigator.clipboard.writeText(txt).then(function(){toast('Disalin — tempel di Google Sheets');},showEx);ok=true;}catch(e){}
-    if(!ok)showEx();
-    function showEx(){$('export').style.display='block';$('exportText').focus();$('exportText').select();toast('Salin manual dari kotak teks');}
-  }
-  $('copyBtn').addEventListener('click',function(){giveText([HEAD].concat(rowsFor(curEv())).join('\n'));});
-  $('copyAllBtn').addEventListener('click',function(){
-    var rows=[HEAD];allEvents().forEach(function(ev){rows=rows.concat(rowsFor(ev));});giveText(rows.join('\n'));
-  });
-
   /* ---------- boot ---------- */
+  function errMsg(e){return (e&&e.message)?String(e.message).replace(/^Error:\s*/,''):'terjadi kesalahan';}
   function start(st,m){
     store=st;mode=m;
-    var guard=setTimeout(function(){if(!ready)$('loading').textContent='Data belum bisa dijangkau. Menunggu koneksi…';},10000);
-    st.subscribe(function(list){clearTimeout(guard);onData(list);},function(){
-      clearTimeout(guard);setSync('error','Gagal memuat data');
+    st.subscribe(function(list){onData(list);},function(e){
+      $('loading').textContent='Gagal memuat: '+errMsg(e);setSync('error','Gagal terhubung ke Spreadsheet');
     });
     if(m==='local')setSync('local');
   }
-  (async function boot(){
-    var db=null,userId=null;
-    try{
-      if(window.claude&&claude.use){
-        var u=await claude.use('user');
-        db=await claude.use('db');
-        if(u&&u.id)userId=await u.id();
-      }
-    }catch(e){db=null;}
-    if(db&&userId)start(cloudStore(db,userId),'cloud');
-    else start(localStore(),'local');
-  })();
+  if(window.google&&google.script&&google.script.run){
+    start(sheetsStore(),'cloud');
+    gas('me').then(function(m){$('who').textContent=' · '+m;},function(){});
+    $('reload').addEventListener('click',function(){
+      gas('loadAll').then(function(l){onData(l);toast('Data dimuat ulang dari Spreadsheet');},function(e){toast('Gagal memuat: '+errMsg(e));});
+    });
+  }else{
+    $('reload').hidden=true;
+    start(localStore(),'local');
+  }
 })();
 </script>
 </body>
