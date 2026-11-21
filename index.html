@@ -8,156 +8,227 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f6fb;--card:#fff;--ink:#1b2236;--mute:#6b7488;--line:#e4e8f1;
-  --pri:#4f46e5;--pri-soft:#eef0ff;--ok:#16a34a;--ok-soft:#e8f7ee;--warn:#d97706;--bad:#dc2626;--bad-soft:#fdecec;
-  --r:16px;
+  --bg:#eef0f8;--card:#fff;--ink:#141a33;--mute:#667090;--line:#e1e5f2;--field:#f5f6fc;
+  --pri:#5b4bff;--pri2:#9a5bff;--pri-soft:#efedff;
+  --ok:#12a465;--ok-soft:#e4f7ee;--na:#b7791f;--na-soft:#fdf3e0;--bad:#dc2626;--bad-soft:#fdecec;
+  --shadow:0 10px 30px -12px rgba(40,30,120,.25);
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#0f1320;--card:#181d30;--ink:#eef1fa;--mute:#98a1b8;--line:#262d46;--pri:#8b86ff;--pri-soft:#232853;--ok:#4ade80;--ok-soft:#14301f;--warn:#fbbf24;--bad:#f87171;--bad-soft:#3a1c1f}
+  :root{--bg:#0b0e1d;--card:#151a2f;--ink:#eef1fb;--mute:#97a0bd;--line:#252c48;--field:#0f1325;
+  --pri:#8f84ff;--pri-soft:#222654;--ok:#4ade80;--ok-soft:#12301f;--na:#fbbf24;--na-soft:#33290f;--bad:#f87171;--bad-soft:#3a1c1f;--shadow:0 10px 30px -12px #000}
 }
 *{box-sizing:border-box;margin:0}
-body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:20px 16px 60px}
-.wrap{max-width:1040px;margin:auto}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between;margin-bottom:20px}
-h1{font-size:clamp(22px,4vw,30px);font-weight:800;letter-spacing:-.02em}
-h1 span{color:var(--pri)}
-.sub{color:var(--mute);font-size:14px}
-.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
-@media(max-width:820px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
-.card h2{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-label.f{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
-input[type=text],input[type=date]{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
-input:focus{outline:2px solid var(--pri);outline-offset:1px}
-.row2{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;margin-bottom:18px}
-@media(max-width:480px){.row2{grid-template-columns:1fr}}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:16px 14px 70px}
+.wrap{max-width:1120px;margin:auto}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 
-/* progress */
-.prog{display:flex;align-items:center;gap:18px;margin-bottom:18px;padding:16px;background:var(--pri-soft);border-radius:14px}
-.ring{--p:0;width:92px;height:92px;border-radius:50%;flex:none;display:grid;place-items:center;
-  background:conic-gradient(var(--pri) calc(var(--p)*1%),var(--line) 0)}
-.ring.done{background:conic-gradient(var(--ok) 100%,var(--ok) 0)}
-.ring b{width:72px;height:72px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:22px;font-weight:800}
-.prog .t{font-weight:700;font-size:15px}
-.prog .d{font-size:13px;color:var(--mute)}
-.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px;min-width:140px}
-.bar i{display:block;height:100%;background:var(--pri);width:0;transition:width .3s}
+/* hero */
+.hero{background:linear-gradient(135deg,#1b1450,#4b34e0 55%,#9a5bff);color:#fff;border-radius:26px;padding:26px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-60px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.07)}
+@media(max-width:700px){.hero{grid-template-columns:1fr;padding:20px}}
+.hero h1{font-size:clamp(24px,4.5vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.15}
+.hero p{opacity:.8;font-size:14px;margin:6px 0 18px}
+.fields{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;max-width:520px;position:relative;z-index:1}
+@media(max-width:480px){.fields{grid-template-columns:1fr}}
+.fields label{font-size:12px;font-weight:600;opacity:.8;display:block;margin-bottom:4px}
+.fields input{width:100%;padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:14px}
+.fields input::placeholder{color:rgba(255,255,255,.55)}
+.fields input::-webkit-calendar-picker-indicator{filter:invert(1)}
+.meter{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.ringbox{position:relative;width:132px;height:132px;flex:none}
+.ringbox svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringbox circle{fill:none;stroke-width:11;stroke-linecap:round}
+.ringbox .bg{stroke:rgba(255,255,255,.18)}
+.ringbox .fg{stroke:#fff;stroke-dasharray:263.9;stroke-dashoffset:263.9;transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1),stroke .3s}
+.ringbox.done .fg{stroke:#7dffb8}
+.ringbox b{position:absolute;inset:0;display:grid;place-items:center;font-size:32px;font-weight:800;letter-spacing:-.03em}
+.mt{font-weight:700;font-size:16px}
+.md{font-size:13px;opacity:.8}
+.newbtn{margin-top:10px;background:#fff;color:#3a28c9;border:0;border-radius:11px;padding:9px 14px;font-weight:700;font-size:13px}
+.confirm{display:none;margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--bad-soft);color:var(--bad);font-size:13.5px;font-weight:600}
+.confirm.show{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.confirm.info{background:var(--pri-soft);color:var(--pri)}
+.confirm .b{display:flex;gap:8px}
+.confirm button{font-size:13px;font-weight:700;padding:7px 14px;border-radius:9px;border:0}
+.confirm .y{background:var(--bad);color:#fff}.confirm.info .y{background:var(--pri);color:#fff}
+.confirm .n{background:var(--card);color:var(--ink)}
 
-/* list */
-.tools{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--card);color:var(--mute);padding:6px 12px;border-radius:99px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
-.chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+/* layout */
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;margin-top:18px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow)}
+.card h2{font-size:17px;font-weight:800;letter-spacing:-.01em;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sync{font-size:12px;font-weight:600;color:var(--mute);display:inline-flex;align-items:center;gap:6px}
+.sync:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.sync.busy:before{background:var(--na)}.sync.err:before{background:var(--bad)}
+
+/* tools */
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.tools{display:flex;gap:7px;margin:12px 0;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--mute);padding:6px 12px;border-radius:99px;font-size:12.5px;font-weight:600}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip em{font-style:normal;opacity:.7;margin-left:3px}
+
+/* items */
 ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:560px){ul.list{grid-template-columns:1fr}}
-.item{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;cursor:pointer;user-select:none;transition:.15s;font-size:14px;font-weight:600}
+.item{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:14px;background:var(--card);transition:background .2s,border-color .2s}
 .item:hover{border-color:var(--pri)}
-.item .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:.15s}
-.item .box svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
-.item.checked{background:var(--ok-soft);border-color:transparent}
-.item.checked .box{background:var(--ok);border-color:var(--ok)}
-.item.checked .box svg{opacity:1}
-.item.checked span{text-decoration:line-through;color:var(--mute)}
+.item label{flex:1;display:flex;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;min-width:0}
+.item label span.t{overflow-wrap:anywhere}
 .item input{position:absolute;opacity:0;pointer-events:none}
+.box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:.2s}
+.box svg{width:13px;height:13px;stroke:#fff;stroke-width:3.2;fill:none;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .25s}
 .item:focus-within{outline:2px solid var(--pri);outline-offset:1px}
+.item.done{background:var(--ok-soft);border-color:transparent}
+.item.done .box{background:var(--ok);border-color:var(--ok)}
+.item.done .box svg{stroke-dashoffset:0}
+.item.done .t{color:var(--mute);text-decoration:line-through}
+.item.na{background:var(--field);border-style:dashed}
+.item.na label{cursor:default;opacity:.55}
+.item.na .box{opacity:.4}
+.item.na .t:after{content:"Tidak ada";margin-left:8px;font-size:11px;font-weight:700;color:var(--na);background:var(--na-soft);padding:2px 7px;border-radius:6px;text-decoration:none;display:inline-block}
+.side{display:flex;align-items:center;gap:2px;padding-right:6px}
+.mini{border:0;background:none;color:var(--mute);font-size:11.5px;font-weight:700;padding:5px 7px;border-radius:8px}
+.mini:hover{background:var(--pri-soft);color:var(--pri)}
+.item.na .mini.nab{color:var(--na);background:var(--na-soft)}
+.mini.rm:hover{background:var(--bad-soft);color:var(--bad)}
 
-/* buttons */
-.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-button.btn{font:inherit;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;border:0;cursor:pointer;transition:.15s}
-.btn.save{background:var(--pri);color:#fff;flex:1;min-width:140px}
-.btn.save:hover{filter:brightness(1.1)}
+.add{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+.add input{flex:1;min-width:0;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.btn{font-weight:700;font-size:14px;padding:11px 18px;border-radius:12px;border:0;transition:filter .15s}
+.btn.pri{background:linear-gradient(135deg,var(--pri),var(--pri2));color:#fff}
+.btn:hover{filter:brightness(1.08)}
 .btn.reset{background:var(--bad-soft);color:var(--bad)}
-.btn.reset:hover{filter:brightness(.96)}
-.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
-.confirm{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--bad-soft);color:var(--bad);font-size:13.5px;font-weight:600}
-.confirm.show{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.confirm .b{display:flex;gap:8px}
-.confirm button{font:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:9px;border:0;cursor:pointer}
-.confirm .y{background:var(--bad);color:#fff}.confirm .n{background:var(--card);color:var(--ink)}
-.confirm.info{background:var(--pri-soft);color:var(--pri);margin:0 0 16px}
-.confirm.info .y{background:var(--pri)}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.actions .pri{flex:1;min-width:150px}
+
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:9}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* history */
-.hist{display:grid;gap:10px;max-height:640px;overflow:auto}
-.h{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.hist{display:grid;gap:10px;max-height:680px;overflow:auto}
+.h{border:1px solid var(--line);border-radius:16px;padding:13px 14px;background:var(--field)}
 .h .top{display:flex;justify-content:space-between;gap:8px;align-items:start}
 .h .n{font-weight:700;font-size:14px}
 .h .m{font-size:12px;color:var(--mute)}
 .pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--pri-soft);color:var(--pri);white-space:nowrap}
 .pill.full{background:var(--ok-soft);color:var(--ok)}
-.h .bar{margin-top:9px}
-.h .bar i{background:var(--pri)}.h .full~.bar i{background:var(--ok)}
-.h .acts{display:flex;gap:6px;margin-top:10px}
-.h .acts button{font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
-.h .acts .del{color:var(--bad)}
+.bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:9px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--pri2));border-radius:99px}
 .h details{margin-top:8px;font-size:12.5px;color:var(--mute)}
 .h summary{cursor:pointer;font-weight:600}
-.h .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .tag{padding:2px 8px;border-radius:6px;font-size:11.5px;font-weight:600}
-.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.no{background:var(--bad-soft);color:var(--bad)}
-.empty{text-align:center;color:var(--mute);font-size:14px;padding:30px 10px}
-.empty b{display:block;font-size:32px;margin-bottom:6px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.no{background:var(--bad-soft);color:var(--bad)}.tag.na{background:var(--na-soft);color:var(--na)}
+.acts{display:flex;gap:6px;margin-top:10px}
+.acts button{font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.acts .del{color:var(--bad)}
+.empty{text-align:center;color:var(--mute);font-size:14px;padding:26px 10px}
+.empty b{display:block;font-size:30px;margin-bottom:4px}
+.who{display:flex;justify-content:flex-end;align-items:center;gap:10px;font-size:13px;color:var(--mute);margin-bottom:10px}
+.who b{color:var(--ink)}
+.who button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 12px;border-radius:99px;font-size:12.5px;font-weight:600}
+.login{display:none;position:fixed;inset:0;z-index:20;background:rgba(10,12,30,.6);backdrop-filter:blur(8px);place-items:center;padding:16px}
+.login.show{display:grid}
+.lbox{background:var(--card);border-radius:24px;padding:26px;max-width:380px;width:100%;box-shadow:var(--shadow)}
+.lbox h2{font-size:20px;font-weight:800;margin-bottom:4px}
+.lbox p{color:var(--mute);font-size:13.5px;margin-bottom:18px}
+.lbox .btn{width:100%;margin-top:10px}
+.lbox .btn.ghost{background:var(--field);color:var(--ink);border:1px solid var(--line)}
+.lbox input{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.lerr{color:var(--bad);font-size:13px;font-weight:600;margin-top:8px;min-height:18px}
+.vhead{display:none;background:linear-gradient(135deg,#1b1450,#4b34e0 55%,#9a5bff);color:#fff;border-radius:26px;padding:26px;box-shadow:var(--shadow);margin-bottom:18px}
+.vhead h1{font-size:clamp(24px,4.5vw,34px);font-weight:800;letter-spacing:-.03em}
+.vhead p{opacity:.8;font-size:14px;margin:6px 0 14px}
+.vhead .tools{margin:0}
+.ro .vhead{display:block}
+.ro .hero,.ro #mainCard,.ro #confirmNew{display:none!important}
+.ro .grid{grid-template-columns:1fr;max-width:760px;margin:0 auto}
+.ro .hist{max-height:none}
+.ro .add,.ro .actions,.ro #newComp,.ro .mini,.ro .acts{display:none!important}
+.ro .item label{cursor:default}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <div class="who" id="who"></div>
+  <section class="hero">
     <div>
-      <h1>Checklist <span>Desain Kompetisi</span></h1>
-      <div class="sub">Pantau kelengkapan desain & dokumen sebelum hari-H.</div>
+      <h1>Checklist Desain Kompetisi</h1>
+      <p>Pantau kelengkapan desain dan dokumen sebelum hari-H.</p>
+      <div class="fields">
+        <div><label for="nama">Nama kompetisi</label><input id="nama" type="text" placeholder="mis. Olimpiade Matematika 2026" maxlength="80"></div>
+        <div><label for="tgl">Tanggal pelaksanaan</label><input id="tgl" type="date"></div>
+      </div>
     </div>
-    <button class="btn save" id="newComp" style="flex:none">➕ Kompetisi Baru</button>
-  </header>
+    <div class="meter">
+      <div class="ringbox" id="ring">
+        <svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg" id="fg" cx="50" cy="50" r="42"/></svg>
+        <b id="pct">0%</b>
+      </div>
+      <div>
+        <div class="mt" id="ptitle">Belum dimulai</div>
+        <div class="md" id="pdesc">0 dari 0 item selesai</div>
+        <button class="newbtn" id="newComp">Kompetisi baru</button>
+      </div>
+    </div>
+  </section>
   <div class="confirm info" id="confirmNew">
-    <span>Mulai kompetisi baru? Progres saat ini otomatis diarsipkan ke riwayat (jika ada isinya), lalu form dikosongkan.</span>
+    <span>Mulai kompetisi baru? Progres saat ini diarsipkan ke riwayat (jika ada isinya), lalu form dikosongkan. Item buatanmu tetap ada.</span>
     <span class="b"><button class="n" id="newNo">Batal</button><button class="y" id="newYes">Ya, mulai baru</button></span>
   </div>
 
+  <div class="vhead"><h1>Daftar Event <span id="vyear"></span></h1><p>Riwayat persiapan tiap event. Halaman ini hanya untuk dilihat.</p><div class="tools" id="years"></div></div>
   <div class="grid">
-    <!-- KIRI: checklist -->
-    <section class="card">
-      <h2>Persiapan Kompetisi</h2>
-      <div class="row2">
-        <div><label class="f" for="nama">Nama kompetisi</label><input id="nama" type="text" placeholder="mis. Olimpiade Matematika 2026" maxlength="80"></div>
-        <div><label class="f" for="tgl">Tanggal pelaksanaan</label><input id="tgl" type="date"></div>
-      </div>
-
-      <div class="prog">
-        <div class="ring" id="ring"><b id="pct">0%</b></div>
-        <div style="flex:1">
-          <div class="t" id="ptitle">Belum dimulai</div>
-          <div class="d" id="pdesc">0 dari 0 item selesai</div>
-          <div class="bar"><i id="pbar"></i></div>
-        </div>
-      </div>
-
+    <section class="card" id="mainCard">
+      <h2>Persiapan Kompetisi <span class="sync" id="sync">Tersimpan otomatis</span></h2>
+      <input class="search" id="q" type="search" placeholder="Cari item persiapan…" aria-label="Cari item">
       <div class="tools" id="filters">
-        <button class="chip on" data-f="all">Semua</button>
-        <button class="chip" data-f="todo">Belum</button>
-        <button class="chip" data-f="done">Selesai</button>
+        <button class="chip on" data-f="all">Semua<em id="c-all"></em></button>
+        <button class="chip" data-f="todo">Belum<em id="c-todo"></em></button>
+        <button class="chip" data-f="done">Selesai<em id="c-done"></em></button>
+        <button class="chip" data-f="na">Tidak ada<em id="c-na"></em></button>
       </div>
-
       <ul class="list" id="list"></ul>
 
+      <div class="add">
+        <input id="newItem" type="text" maxlength="40" placeholder="Tambah jenis persiapan, mis. Name tag juri">
+        <button class="btn pri" id="addBtn">Tambah</button>
+      </div>
       <div class="actions">
-        <button class="btn save" id="save">💾 Simpan ke Riwayat</button>
-        <button class="btn reset" id="reset">↺ Reset</button>
+        <button class="btn pri" id="save">Simpan ke riwayat</button>
+        <button class="btn reset" id="reset">Reset centang</button>
       </div>
       <div class="confirm" id="confirm">
-        <span>Semua centang akan dihapus. Lanjutkan reset?</span>
+        <span>Semua centang dan tanda "tidak ada" akan dihapus. Lanjutkan reset?</span>
         <span class="b"><button class="n" id="no">Batal</button><button class="y" id="yes">Ya, reset</button></span>
       </div>
     </section>
 
-    <!-- KANAN: riwayat -->
     <aside class="card">
-      <h2>Riwayat Persiapan <span class="pill" id="hcount">0</span></h2>
+      <h2><span id="htitle">Riwayat Persiapan</span> <span class="pill" id="hcount">0</span></h2>
       <div class="hist" id="hist"></div>
     </aside>
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="login show" id="login"><div class="lbox">
+  <h2>Masuk</h2>
+  <p>Admin (Desain Grafis) bisa mengubah data. User hanya bisa melihat.</p>
+  <div id="choose">
+    <button class="btn pri" id="asAdmin">Admin (Desain Grafis)</button>
+    <button class="btn ghost" id="asViewer">User (lihat saja)</button>
+  </div>
+  <div id="adminForm" hidden>
+    <input id="pw" type="password" placeholder="Kata sandi admin" autocomplete="current-password">
+    <div class="lerr" id="lerr"></div>
+    <button class="btn pri" id="pwGo" style="margin-top:0">Masuk sebagai Admin</button>
+    <button class="btn ghost" id="pwBack">Kembali</button>
+  </div>
+</div></div>
 
 <script>
 const ITEMS = [
@@ -168,162 +239,214 @@ const ITEMS = [
   "COVER MC","COVER PPT","UANG PEMBINAAN"
 ];
 const KEY = "cek-kompetisi-v1";
-// GANTI dengan URL Web App dari Google Apps Script (berakhiran /exec)
+// URL Web App Google Apps Script (berakhiran /exec)
 const API_URL = "https://script.google.com/macros/s/AKfycbxE1qQZxkiEIjANMDSSqvT2Dym4bpNAwEQihphGKgpRgQOH2QvGhHY9vMev61OIUnCD/exec";
-let mem = null; // cadangan bila localStorage tidak tersedia
-let state = { nama:"", tgl:"", checked:{}, history:[] };
-let filter = "all";
+const CUSTOM = "__custom"; // daftar item buatan sendiri disimpan di dalam objek "checked" agar cocok dengan backend lama
+let mem = null;
+// checked[nama] = true (selesai) | "na" (tidak ada di kompetisi ini)
+let state = { nama:"", tgl:"", checked:{}, custom:[], history:[] };
+let filter = "all", query = "";
+const RK="cek-role", PK="cek-pass";
+let role="", pass="", poller=null;
+try{ role=localStorage.getItem(RK)||""; pass=localStorage.getItem(PK)||""; }catch(e){}
+if(role==="admin" && !pass) role="";
+const isAdmin = () => role==="admin";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sortId = a => [...new Set(a)].sort((x,y)=>x.localeCompare(y,"id",{sensitivity:"base"}));
+const allItems = (custom=state.custom) => sortId([...ITEMS,...custom]);
+const pack = (checked,custom) => Object.assign({}, checked, {[CUSTOM]:custom});
+function unpack(c){ c = Object.assign({}, c||{}); const cu = Array.isArray(c[CUSTOM])?c[CUSTOM]:[]; delete c[CUSTOM]; return {checked:c, custom:cu}; }
+const nowStr = () => new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?"":d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),2200); }
+function setSync(s,txt){ const e=$("sync"); e.className="sync "+s; e.textContent=txt; }
 
 function load(){
-  try{ const r = localStorage.getItem(KEY); if(r) state = Object.assign(state, JSON.parse(r)); }
-  catch(e){ if(mem) state = mem; }
+  try{ const r=localStorage.getItem(KEY); if(r) state=Object.assign(state,JSON.parse(r)); }
+  catch(e){ if(mem) state=mem; }
+  if(!Array.isArray(state.custom)) state.custom=[];
 }
-let syncTimer = null;
 const apiReady = () => API_URL.startsWith("https://");
 function api(body){
   if(!apiReady()) return Promise.reject(new Error("API_URL belum diisi"));
-  // text/plain agar tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
-  return fetch(API_URL,{method:"POST",body:JSON.stringify(body)}).then(r=>r.json()).then(r=>{
-    if(!r.ok) throw new Error(r.error||"gagal"); return r;
-  });
+  // string biasa = text/plain, tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
+  return fetch(API_URL,{method:"POST",body:JSON.stringify(Object.assign({pass},body)),keepalive:true}).then(r=>r.json()).then(r=>{ if(!r.ok){ if(r.error==="unauthorized"&&isAdmin()&&body.action!=="login"){ logout(); toast("Sesi admin tidak valid, silakan masuk lagi"); } throw new Error(r.error||"gagal"); } return r; });
+}
+let syncTimer=null;
+function sendActive(){
+  clearTimeout(syncTimer); syncTimer=null;
+  return api({action:"active",nama:state.nama,tgl:state.tgl,checked:pack(state.checked,state.custom)})
+    .then(()=>setSync("","Tersimpan otomatis"))
+    .catch(()=>setSync("err","Gagal sinkron, tersimpan di perangkat"));
 }
 function persist(){
-  mem = state;
-  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
-  if(!apiReady()) return;
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(()=>{
-    api({action:"active",nama:state.nama,tgl:state.tgl,checked:state.checked})
-      .catch(()=>toast("Gagal sinkron ke Spreadsheet"));
-  },800);
+  if(!isAdmin()) return;
+  mem=state;
+  try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
+  if(!apiReady()){ setSync("","Tersimpan di perangkat"); return; }
+  setSync("busy","Menyimpan…");
+  clearTimeout(syncTimer); syncTimer=setTimeout(sendActive,700);
 }
+document.addEventListener("visibilitychange",()=>{ if(document.hidden && syncTimer) sendActive(); });
+
 async function pull(){
   if(!apiReady()) return;
   try{
     const d = await (await fetch(API_URL)).json();
-    state.nama = d.nama||""; state.tgl = d.tgl||"";
-    state.checked = d.checked||{}; state.history = d.history||[];
-    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
-    $("nama").value = state.nama; $("tgl").value = state.tgl;
-    renderList(); renderProgress(); renderHistory();
+    const u = unpack(d.checked);
+    state.nama=d.nama||""; state.tgl=d.tgl||""; state.checked=u.checked;
+    state.custom = sortId([...state.custom,...u.custom]);
+    state.history=(d.history||[]);
+    try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
+    $("nama").value=state.nama; $("tgl").value=state.tgl;
+    renderAll();
   }catch(e){ toast("Offline: memakai data lokal"); }
 }
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function fmtDate(iso){
-  if(!iso) return "";
-  const d = new Date(iso); if(isNaN(d)) return "";
-  return d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"});
-}
-function toast(msg){
-  const t=$("toast"); t.textContent=msg; t.classList.add("show");
-  clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),2200);
+
+function stats(checked=state.checked, items=allItems()){
+  const na=items.filter(n=>checked[n]==="na").length;
+  const done=items.filter(n=>checked[n]===true).length;
+  const total=items.length-na;
+  return {done,na,total,all:items.length,percent: total? Math.round(done/total*100):0};
 }
 
 function renderList(){
-  const ul = $("list"); ul.innerHTML = "";
-  ITEMS.forEach((name,i)=>{
-    const on = !!state.checked[name];
-    if(filter==="todo" && on) return;
+  const ul=$("list"); ul.innerHTML="";
+  const q=query.trim().toLowerCase();
+  allItems().forEach(name=>{
+    const v=state.checked[name], isNa=v==="na", on=v===true;
+    if(filter==="todo" && (on||isNa)) return;
     if(filter==="done" && !on) return;
-    const li = document.createElement("li");
-    li.innerHTML = `<label class="item ${on?"checked":""}">
-      <input type="checkbox" ${on?"checked":""}>
-      <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
-      <span>${esc(name)}</span></label>`;
+    if(filter==="na" && !isNa) return;
+    if(q && !name.toLowerCase().includes(q)) return;
+    const custom=state.custom.includes(name);
+    const li=document.createElement("li");
+    li.innerHTML=`<div class="item ${on?"done":""} ${isNa?"na":""}">
+      <label><input type="checkbox" ${on?"checked":""} ${isNa||!isAdmin()?"disabled":""}>
+        <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
+        <span class="t">${esc(name)}</span></label>
+      <span class="side">
+        <button class="mini nab" data-a="na" title="${isNa?"Aktifkan kembali item ini":"Tandai: tidak ada di kompetisi ini"}">${isNa?"Aktifkan":"Tidak ada"}</button>
+        ${custom?`<button class="mini rm" data-a="rm" title="Hapus item" aria-label="Hapus ${esc(name)}">✕</button>`:""}
+      </span></div>`;
     li.querySelector("input").addEventListener("change",e=>{
-      state.checked[name] = e.target.checked;
-      persist(); renderList(); renderProgress();
+      if(e.target.checked) state.checked[name]=true; else delete state.checked[name];
+      persist(); renderAll();
+    });
+    li.querySelector('[data-a="na"]').addEventListener("click",()=>{
+      if(isNa) delete state.checked[name]; else state.checked[name]="na";
+      persist(); renderAll();
+    });
+    const rm=li.querySelector('[data-a="rm"]');
+    if(rm) rm.addEventListener("click",()=>{
+      state.custom=state.custom.filter(x=>x!==name); delete state.checked[name];
+      persist(); renderAll(); toast("Item dihapus");
     });
     ul.appendChild(li);
   });
   if(!ul.children.length){
-    ul.innerHTML = `<li class="empty" style="grid-column:1/-1">${filter==="done"?"Belum ada item yang selesai.":"Semua item sudah selesai 🎉"}</li>`;
+    const msg = q?"Tidak ada item yang cocok.":filter==="done"?"Belum ada item yang selesai.":filter==="na"?"Belum ada item yang ditandai tidak ada.":"Semua item sudah selesai 🎉";
+    ul.innerHTML=`<li class="empty" style="grid-column:1/-1">${msg}</li>`;
   }
 }
-// Nama sama (tanpa peduli huruf besar/kecil & spasi) => timpa data lama, nama beda => entri baru
-function upsertHistory(entry){
-  const k = (entry.nama||"").trim().toLowerCase();
-  if(k) state.history = state.history.filter(x=>(x.nama||"").trim().toLowerCase()!==k);
-  state.history.unshift(entry);
-}
-function count(){ return ITEMS.filter(n=>state.checked[n]).length; }
 function renderProgress(){
-  const done = count(), total = ITEMS.length, p = Math.round(done/total*100);
-  $("pct").textContent = p+"%";
-  $("ring").style.setProperty("--p",p);
-  $("ring").classList.toggle("done",p===100);
-  $("pbar").style.width = p+"%";
-  $("pdesc").textContent = `${done} dari ${total} item selesai`;
-  $("ptitle").textContent = p===100 ? "Semua desain siap! 🎉" : p===0 ? "Belum dimulai" : p>=75 ? "Hampir selesai" : p>=40 ? "Sedang berjalan" : "Baru dimulai";
+  const s=stats();
+  $("pct").textContent=s.percent+"%";
+  $("fg").style.strokeDashoffset=263.9*(1-s.percent/100);
+  $("ring").classList.toggle("done",s.total>0&&s.percent===100);
+  $("pdesc").textContent=`${s.done} dari ${s.total} item selesai`+(s.na?` · ${s.na} tidak ada`:"");
+  $("ptitle").textContent = s.total===0?"Belum ada item aktif": s.percent===100?"Semua desain siap! 🎉": s.percent===0?"Belum dimulai": s.percent>=75?"Hampir selesai": s.percent>=40?"Sedang berjalan":"Baru dimulai";
+  $("c-all").textContent=s.all; $("c-todo").textContent=s.total-s.done; $("c-done").textContent=s.done; $("c-na").textContent=s.na;
 }
+let viewYear=String(new Date().getFullYear());
+const yearOf=e=>(e.tgl&&String(e.tgl).slice(0,4))||"Tanpa tanggal";
 function renderHistory(){
-  const box = $("hist"), h = state.history;
-  $("hcount").textContent = h.length;
-  if(!h.length){
-    box.innerHTML = `<div class="empty"><b>🗂️</b>Belum ada riwayat.<br>Tekan <b style="display:inline;font-size:inherit">Simpan</b> untuk menyimpan progres saat ini.</div>`;
-    return;
+  const box=$("hist"); let h=state.history;
+  if(!isAdmin()){
+    const ys=[...new Set([viewYear,...h.map(yearOf)])].sort((a,b)=>(+b||0)-(+a||0));
+    $("years").innerHTML=ys.map(y=>`<button class="chip ${y===viewYear?"on":""}" data-y="${esc(y)}">${esc(y)}</button>`).join("");
+    $("vyear").textContent=viewYear;
+    h=h.filter(e=>yearOf(e)===viewYear).sort((a,b)=>String(a.tgl||"").localeCompare(String(b.tgl||"")));
   }
-  box.innerHTML = h.map(e=>{
-    const full = e.percent===100;
-    const tags = ITEMS.map(n=>`<span class="tag ${e.checked[n]?"ok":"no"}">${esc(n)}</span>`).join("");
+  $("htitle").textContent=isAdmin()?"Riwayat Persiapan":"Event "+viewYear;
+  $("hcount").textContent=h.length;
+  if(!h.length){ box.innerHTML=isAdmin()?`<div class="empty"><b>🗂️</b>Belum ada riwayat.<br>Tekan "Simpan ke riwayat" untuk menyimpan progres saat ini.</div>`:`<div class="empty"><b>📅</b>Belum ada event di ${esc(viewYear)}.</div>`; return; }
+  box.innerHTML=h.map(e=>{
+    const u=unpack(e.checked), items=allItems(u.custom), full=e.percent===100;
+    const tags=items.map(n=>{const v=u.checked[n]; return `<span class="tag ${v==="na"?"na":v?"ok":"no"}">${esc(n)}</span>`;}).join("");
     return `<div class="h" data-id="${e.id}">
       <div class="top"><div><div class="n">${esc(e.nama||"Tanpa nama")}</div>
         <div class="m">${e.tgl?"Pelaksanaan "+fmtDate(e.tgl)+" · ":""}Disimpan ${esc(e.savedAt)}</div></div>
         <span class="pill ${full?"full":""}">${e.percent}%</span></div>
       <div class="bar"><i style="width:${e.percent}%;${full?"background:var(--ok)":""}"></i></div>
-      <details><summary>${e.done}/${e.total} item selesai — lihat detail</summary><div class="tags">${tags}</div></details>
+      <details><summary>${e.done}/${e.total} item selesai, lihat detail</summary><div class="tags">${tags}</div></details>
       <div class="acts"><button data-a="load">Muat kembali</button><button class="del" data-a="del">Hapus</button></div>
     </div>`;
   }).join("");
 }
+function renderAll(){ renderList(); renderProgress(); renderHistory(); }
+
+function makeEntry(){
+  const s=stats();
+  return {id:Date.now(),nama:state.nama.trim(),tgl:state.tgl,checked:pack(state.checked,state.custom),done:s.done,total:s.total,percent:s.percent,savedAt:nowStr()};
+}
+// Nama sama => timpa data lama, nama beda => entri baru
+function upsertHistory(entry){
+  const k=(entry.nama||"").trim().toLowerCase();
+  if(k) state.history=state.history.filter(x=>(x.nama||"").trim().toLowerCase()!==k);
+  state.history.unshift(entry);
+}
 
 $("filters").addEventListener("click",e=>{
-  const b = e.target.closest(".chip"); if(!b) return;
-  filter = b.dataset.f;
+  const b=e.target.closest(".chip"); if(!b) return;
+  filter=b.dataset.f;
   document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c===b));
   renderList();
 });
+$("q").addEventListener("input",e=>{query=e.target.value; renderList();});
 $("nama").addEventListener("input",e=>{state.nama=e.target.value;persist();});
 $("tgl").addEventListener("input",e=>{state.tgl=e.target.value;persist();});
 
+function addItem(){
+  const inp=$("newItem"), name=inp.value.trim().replace(/\s+/g," ").toUpperCase();
+  if(!name) return;
+  if(allItems().some(x=>x.toLowerCase()===name.toLowerCase())){ toast("Item itu sudah ada"); return; }
+  state.custom=sortId([...state.custom,name]);
+  inp.value=""; filter="all"; query=""; $("q").value="";
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f==="all"));
+  persist(); renderAll(); toast("Item ditambahkan");
+}
+$("addBtn").addEventListener("click",addItem);
+$("newItem").addEventListener("keydown",e=>{ if(e.key==="Enter") addItem(); });
+
 $("save").addEventListener("click",()=>{
-  const done = count(), total = ITEMS.length;
-  upsertHistory({
-    id: Date.now(),
-    nama: state.nama.trim(), tgl: state.tgl,
-    checked: Object.assign({}, state.checked),
-    done, total, percent: Math.round(done/total*100),
-    savedAt: new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})
-  });
-  persist(); renderHistory();
+  upsertHistory(makeEntry()); persist(); renderHistory();
   if(!apiReady()){ toast("Tersimpan lokal (URL Spreadsheet belum diisi)"); return; }
-  api({action:"add",entry:state.history[0]})
-    .then(()=>toast("Progres tersimpan ke Spreadsheet ✓"))
-    .catch(()=>toast("Gagal menyimpan ke Spreadsheet"));
+  api({action:"add",entry:state.history[0]}).then(()=>toast("Progres tersimpan ke Spreadsheet ✓")).catch(()=>toast("Gagal menyimpan ke Spreadsheet"));
 });
 
 $("reset").addEventListener("click",()=>$("confirm").classList.add("show"));
 $("no").addEventListener("click",()=>$("confirm").classList.remove("show"));
 $("yes").addEventListener("click",()=>{
-  state.checked = {}; persist();
-  $("confirm").classList.remove("show");
-  renderList(); renderProgress(); toast("Checklist direset");
+  state.checked={}; persist(); $("confirm").classList.remove("show"); renderAll(); toast("Checklist direset");
 });
 
 $("hist").addEventListener("click",e=>{
-  const b = e.target.closest("button[data-a]"); if(!b) return;
-  const id = +b.closest(".h").dataset.id;
-  const entry = state.history.find(x=>x.id===id); if(!entry) return;
+  const b=e.target.closest("button[data-a]"); if(!b) return;
+  const id=+b.closest(".h").dataset.id;
+  const entry=state.history.find(x=>x.id===id); if(!entry) return;
   if(b.dataset.a==="del"){
-    state.history = state.history.filter(x=>x.id!==id);
+    state.history=state.history.filter(x=>x.id!==id);
     persist(); renderHistory(); toast("Riwayat dihapus");
     if(apiReady()) api({action:"delete",id}).catch(()=>toast("Gagal menghapus di Spreadsheet"));
-  } else {
-    state.checked = Object.assign({}, entry.checked);
-    state.nama = entry.nama; state.tgl = entry.tgl;
-    $("nama").value = state.nama; $("tgl").value = state.tgl;
-    persist(); renderList(); renderProgress(); toast("Riwayat dimuat ke checklist");
+  }else{
+    const u=unpack(entry.checked);
+    state.checked=u.checked; state.custom=sortId([...state.custom,...u.custom]);
+    state.nama=entry.nama; state.tgl=entry.tgl;
+    $("nama").value=state.nama; $("tgl").value=state.tgl;
+    persist(); renderAll(); toast("Riwayat dimuat ke checklist");
     window.scrollTo({top:0,behavior:"smooth"});
   }
 });
@@ -332,31 +455,55 @@ $("newComp").addEventListener("click",()=>$("confirmNew").classList.add("show"))
 $("newNo").addEventListener("click",()=>$("confirmNew").classList.remove("show"));
 $("newYes").addEventListener("click",()=>{
   $("confirmNew").classList.remove("show");
-  const done = count(), total = ITEMS.length;
-  let entry = null;
-  if(state.nama.trim() || done>0){
-    entry = {
-      id: Date.now(), nama: state.nama.trim(), tgl: state.tgl,
-      checked: Object.assign({}, state.checked),
-      done, total, percent: Math.round(done/total*100),
-      savedAt: new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})
-    };
-    upsertHistory(entry);
-  }
-  state.nama = ""; state.tgl = ""; state.checked = {};
-  $("nama").value = ""; $("tgl").value = "";
-  filter = "all";
+  let entry=null;
+  if(state.nama.trim()||stats().done>0){ entry=makeEntry(); upsertHistory(entry); }
+  state.nama=""; state.tgl=""; state.checked={};
+  $("nama").value=""; $("tgl").value="";
+  filter="all"; query=""; $("q").value="";
   document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f==="all"));
-  persist(); renderList(); renderProgress(); renderHistory();
-  if(entry && apiReady()) api({action:"add",entry}).catch(()=>toast("Gagal menyimpan arsip ke Spreadsheet"));
-  toast(entry ? "Progres lama diarsipkan, kompetisi baru dimulai" : "Kompetisi baru dimulai");
+  persist(); renderAll();
+  if(entry&&apiReady()) api({action:"add",entry}).catch(()=>toast("Gagal menyimpan arsip ke Spreadsheet"));
+  toast(entry?"Progres lama diarsipkan, kompetisi baru dimulai":"Kompetisi baru dimulai");
   $("nama").focus();
 });
 
+$("years").addEventListener("click",e=>{ const b=e.target.closest("[data-y]"); if(!b) return; viewYear=b.dataset.y; renderHistory(); });
+function applyRole(){
+  document.body.classList.toggle("ro",!isAdmin());
+  $("nama").disabled=$("tgl").disabled=!isAdmin();
+  $("login").classList.toggle("show",!role);
+  $("who").innerHTML = role ? `Masuk sebagai <b>${isAdmin()?"Admin (Desain Grafis)":"User (lihat saja)"}</b> <button id="logout">Keluar</button>` : "";
+  if(role) $("logout").addEventListener("click",logout);
+  clearInterval(poller); if(role && !isAdmin()) poller=setInterval(pull,30000);
+  renderAll();
+}
+function logout(){
+  role=""; pass=""; try{ localStorage.removeItem(RK); localStorage.removeItem(PK); }catch(e){}
+  $("choose").hidden=false; $("adminForm").hidden=true; $("pw").value=""; $("lerr").textContent="";
+  applyRole();
+}
+function enter(r,pw){
+  role=r; pass=pw||"";
+  try{ localStorage.setItem(RK,role); if(pass) localStorage.setItem(PK,pass); else localStorage.removeItem(PK); }catch(e){}
+  applyRole(); pull();
+}
+$("asViewer").addEventListener("click",()=>enter("viewer"));
+$("asAdmin").addEventListener("click",()=>{ $("choose").hidden=true; $("adminForm").hidden=false; $("pw").focus(); });
+$("pwBack").addEventListener("click",()=>{ $("choose").hidden=false; $("adminForm").hidden=true; $("lerr").textContent=""; });
+function tryLogin(){
+  const p=$("pw").value; if(!p) return;
+  $("lerr").textContent="Memeriksa…";
+  const prev=pass; pass=p; role="admin";
+  api({action:"login"}).then(()=>{ role=""; $("pw").value=""; $("lerr").textContent=""; enter("admin",p); })
+    .catch(e=>{ role=""; pass=prev; $("lerr").textContent = e.message==="unauthorized"?"Kata sandi salah.":"Gagal terhubung ke server. Pastikan Apps Script sudah diperbarui."; });
+}
+$("pwGo").addEventListener("click",tryLogin);
+$("pw").addEventListener("keydown",e=>{ if(e.key==="Enter") tryLogin(); });
+
 load();
-$("nama").value = state.nama; $("tgl").value = state.tgl;
-renderList(); renderProgress(); renderHistory();
-pull();
+$("nama").value=state.nama; $("tgl").value=state.tgl;
+applyRole();
+if(role) pull();
 </script>
 </body>
 </html>
