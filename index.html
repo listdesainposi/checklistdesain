@@ -19,7 +19,8 @@
 }
 *{box-sizing:border-box;margin:0}
 body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:16px 14px 70px}
-.wrap{max-width:1120px;margin:auto}
+.wrap{max-width:none;margin:auto}
+@media(min-width:1024px){body{padding:20px 36px 70px}}
 button{font:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 
@@ -71,7 +72,7 @@ button{font:inherit;cursor:pointer}
 .chip em{font-style:normal;opacity:.7;margin-left:3px}
 
 /* items */
-ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+ul.list{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:start}
 @media(max-width:560px){ul.list{grid-template-columns:1fr}}
 .item{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:11px 12px;transition:background .2s,border-color .2s}
 .item:hover,.item:focus-within{border-color:var(--pri)}
@@ -147,14 +148,14 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .vhead .tools{margin:0}
 .ro .vhead{display:block}
 .ro .hero,.ro #mainCard,.ro #confirmNew{display:none!important}
-.ro .grid{grid-template-columns:1fr;max-width:760px;margin:0 auto}
+.ro .grid{grid-template-columns:1fr}
 .ro .hist{max-height:none}
 .vhead .chip{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:#fff}
 .vhead .chip.on{background:#fff;border-color:#fff;color:#3a28c9}
 .vstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
 .vs{background:rgba(255,255,255,.13);border-radius:14px;padding:10px 14px}
 .vs b{display:block;font-size:22px;font-weight:800}.vs span{font-size:12px;opacity:.85}
-#events{display:none;max-width:820px;margin:0 auto}.ro #events{display:block}
+#events{display:none}.ro #events{display:block}
 .ro .grid{display:none!important}
 .mh{font-size:14px;font-weight:700;color:var(--mute);margin:20px 4px 10px}
 .ev{display:grid;grid-template-columns:62px 1fr auto;gap:14px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -173,17 +174,18 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .nav button{border:1px solid var(--line);background:var(--card);color:var(--mute);padding:9px 18px;border-radius:12px;font-weight:700;font-size:14px}
 .nav button.on{background:linear-gradient(135deg,var(--pri),var(--pri2));border-color:transparent;color:#fff}
 .btn.ghost{background:var(--field);color:var(--ink);border:1px solid var(--line)}
-#drafView{display:none;max-width:820px;margin:0 auto}
-.v-draf #drafView{display:block}
-.v-home .hero,.v-home #mainCard,.v-draf .hero,.v-draf .grid,.v-prep #histCard,.rd .hero,.rd .grid,.rd #confirmNew{display:none!important}
-.v-home .grid,.v-prep .grid{grid-template-columns:1fr;max-width:820px;margin-left:auto;margin-right:auto}
+#drafView,#planView{display:none}
+.v-draf #drafView,.v-plan #planView{display:block}
+.v-home .hero,.v-home #mainCard,.v-draf .hero,.v-draf .grid,.v-plan .hero,.v-plan .grid,.v-prep #histCard,.rd .hero,.rd .grid,.rd #confirmNew{display:none!important}
+.v-home .grid,.v-prep .grid{grid-template-columns:1fr}
 .r-admin .dronly{display:none!important}
 .dform{display:grid;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
-.dform input,.dform textarea,#dFilter,#dStat{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.dform input,.dform textarea,.dform select,#dFilter,#dStat,#dPic,#pFPic,#pFSt{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
 .dform textarea{resize:vertical}
 .drow{display:flex;gap:8px}
-.dtools{display:grid;grid-template-columns:1fr 190px 140px;gap:8px}
-@media(max-width:560px){.dtools{grid-template-columns:1fr}}
+.dtools{display:grid;grid-template-columns:1fr 170px 130px 130px;gap:8px}
+.dtools.t3{grid-template-columns:1fr 150px 150px}
+@media(max-width:560px){.dtools,.dtools.t3{grid-template-columns:1fr}}
 .dc{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--field);margin-top:10px}
 .dc .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
 .dc .jn{font-weight:800;font-size:14.5px}
@@ -207,14 +209,26 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .seg button.on.c{background:var(--bad-soft);color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
 .ro .dronly{display:none!important}
 .ro .nav{display:flex}.ro .nav [data-v="prep"]{display:none}
-.ro.v-draf .vhead,.ro.v-draf #events{display:none!important}
+.ro.v-draf .vhead,.ro.v-draf #events,.ro.v-plan .vhead,.ro.v-plan #events{display:none!important}
+.ro .edonly{display:none!important}
+.rd .nav{display:flex}.rd .nav [data-v="home"],.rd .nav [data-v="prep"]{display:none}
+.drow3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:560px){.drow3{grid-template-columns:1fr}}
+.dform select{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.psum{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 14px}
+.psum:empty{display:none}
+.ps{background:var(--field);border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+.pst{display:flex;justify-content:space-between;align-items:baseline}.pst b{font-size:14px}.pst span{font-size:20px;font-weight:800;color:var(--pri)}
+.psm{font-size:12px;color:var(--mute);font-weight:600;margin-top:6px}
+.dst.rencana{background:var(--pri-soft);color:var(--pri)}.dst.tayang{background:var(--ok-soft);color:var(--ok)}
+.seg button.on.n{background:var(--pri-soft);color:var(--pri);box-shadow:inset 0 0 0 1px var(--pri)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="who" id="who"></div>
-  <div class="nav" id="nav"><button data-v="home">Riwayat</button><button data-v="prep">Persiapan</button><button data-v="draf">List Desain</button></div>
+  <div class="nav" id="nav"><button data-v="home">Riwayat</button><button data-v="prep">Persiapan</button><button data-v="draf">List Desain</button><button data-v="plan">Content Plan</button></div>
   <section class="hero">
     <div>
       <h1>Checklist Desain Kompetisi</h1>
@@ -248,14 +262,34 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
     <div class="dronly dform">
       <input id="dEvent" list="evList" placeholder="Event / kompetisi" maxlength="80">
       <input id="dJenis" placeholder="Ketik jenis desain, mis. FLYER" maxlength="60">
+      <select id="dPicIn" aria-label="PIC desain"><option value="">Pilih PIC desain</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select>
       <input id="dIsi" type="url" inputmode="url" placeholder="Tempel link draf (Google Doc, Drive, Canva, dll.)" maxlength="500">
       <p class="dhint">Atur akses link ke “Siapa saja yang memiliki link” supaya Desain Grafis bisa membukanya.</p>
       <div class="dfield"><label for="dDl">Deadline desain</label><input id="dDl" type="date"></div>
       <div class="drow"><button class="btn pri" id="dSave">Simpan draf</button><button class="btn ghost" id="dCancel" hidden>Batal edit</button></div>
       <datalist id="evList"></datalist>
     </div>
-    <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select><select id="dStat" aria-label="Filter status"><option value="">Semua status</option><option value="proses">Proses</option><option value="siap">Siap</option><option value="batal">Cancel</option></select></div>
+    <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select><select id="dPic" aria-label="Filter PIC"><option value="">Semua PIC</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select><select id="dStat" aria-label="Filter status"><option value="">Semua status</option><option value="proses">Proses</option><option value="siap">Siap</option><option value="batal">Cancel</option></select></div>
+    <div id="dSum" class="psum"></div>
     <div id="dList"></div>
+  </div></section>
+  <section id="planView"><div class="card">
+    <h2><span>Content Plan Digital Marketing</span><span class="pill" id="pcount">0</span></h2>
+    <div class="edonly dform">
+      <input id="pJudul" type="text" placeholder="Topik / judul konten" maxlength="120">
+      <div class="drow3">
+        <div class="dfield"><label for="pTgl">Tanggal tayang</label><input id="pTgl" type="date"></div>
+        <div class="dfield"><label for="pPlat">Platform</label><select id="pPlat"><option value="">Pilih platform</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Facebook</option><option>WhatsApp</option><option>Website</option><option>Lainnya</option></select></div>
+        <div class="dfield"><label for="pPic">PIC</label><select id="pPic"><option value="">Pilih PIC</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select></div>
+      </div>
+      <input id="pEvent" list="evList" placeholder="Event terkait (opsional)" maxlength="80">
+      <textarea id="pCap" rows="3" placeholder="Caption / catatan (opsional)" maxlength="1000"></textarea>
+      <input id="pLink" type="url" inputmode="url" placeholder="Link materi (opsional, Drive / Canva / dll.)" maxlength="500">
+      <div class="drow"><button class="btn pri" id="pSave">Simpan konten</button><button class="btn ghost" id="pCancel" hidden>Batal edit</button></div>
+    </div>
+    <div class="dtools t3"><input class="search" id="pq" placeholder="Cari konten…" aria-label="Cari konten"><select id="pFPic" aria-label="Filter PIC"><option value="">Semua PIC</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select><select id="pFSt" aria-label="Filter status"><option value="">Semua status</option><option value="rencana">Rencana</option><option value="proses">Proses</option><option value="tayang">Tayang</option><option value="batal">Cancel</option></select></div>
+    <div id="pSum" class="psum"></div>
+    <div id="pList"></div>
   </div></section>
   <div class="grid">
     <section class="card" id="mainCard">
@@ -341,6 +375,7 @@ function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return isNaN(d
 function toast(msg,ms=2200){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),ms); }
 function errMsg(e){
   const m=String((e&&e.message)||e||"");
+  if(m==="duplikat") return "data yang sama sudah ada (tidak boleh double)";
   if(m==="unauthorized") return "tidak ada izin, coba masuk ulang";
   if(/Unexpected token|JSON/i.test(m)) return "Apps Script belum diizinkan / belum di-deploy versi baru";
   if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return "tidak bisa terhubung ke server";
@@ -353,6 +388,7 @@ function load(){
   catch(e){ if(mem) state=mem; }
   if(!Array.isArray(state.custom)) state.custom=[];
   if(!state.notes||typeof state.notes!=="object") state.notes={};
+  state.history=dedupeHist(Array.isArray(state.history)?state.history:[]);
 }
 const apiReady = () => API_URL.startsWith("https://");
 function api(body){
@@ -386,7 +422,7 @@ async function pull(){
     const u = unpack(d.checked);
     state.nama=d.nama||""; state.tgl=d.tgl||""; state.checked=u.checked; state.notes=u.notes;
     state.custom = sortId([...state.custom,...u.custom]);
-    state.history=(d.history||[]);
+    state.history=dedupeHist(d.history||[]);
     try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
     $("nama").value=state.nama; $("tgl").value=state.tgl;
     renderAll();
@@ -515,7 +551,7 @@ function renderHistory(){
     </div>`;
   }).join("");
 }
-function renderAll(){ renderList(); renderProgress(); renderHistory(); if(view==="draf") renderDraf(); }
+function renderAll(){ renderList(); renderProgress(); renderHistory(); if(view==="draf") renderDraf(); if(view==="plan") renderPlan(); }
 
 function makeEntry(){
   const s=stats();
@@ -599,60 +635,91 @@ $("newYes").addEventListener("click",()=>{
 
 $("years").addEventListener("click",e=>{ const b=e.target.closest("[data-y]"); if(!b) return; viewYear=b.dataset.y; renderHistory(); });
 function setView(v){
-  view=v; const bc=document.body.classList; bc.remove("v-home","v-prep","v-draf"); bc.add("v-"+v);
+  view=v; const bc=document.body.classList; bc.remove("v-home","v-prep","v-draf","v-plan"); bc.add("v-"+v);
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
   if(v==="draf"){ renderDraf(); getDraf(); }
+  if(v==="plan"){ renderPlan(); getPlan(); }
   window.scrollTo({top:0});
 }
 $("nav").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(b) setView(b.dataset.v); });
 
 const STATUS={proses:"Proses",siap:"Siap",batal:"Cancel"};
-let drafs=[], editId=null;
+const CPST={rencana:"Rencana",proses:"Proses",tayang:"Tayang",batal:"Cancel"};
+const PICS=["Aji","Fahrizal"];
+let drafs=[], editId=null, plans=[], planEditId=null;
 const cmp=(a,b)=>String(a).localeCompare(String(b),"id",{sensitivity:"base"});
+const nkey=s=>String(s==null?"":s).trim().replace(/\s+/g," ").toLowerCase();
 const todayIso=()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 const dayOf=s=>{ if(!s) return null; const d=new Date(String(s).slice(0,10)+"T00:00:00"); return isNaN(d)?null:d; };
 const fmtD=s=>{ const d=dayOf(s); return d?d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}):""; };
-// Data tambahan (link, status, deadline, tgl upload) dibungkus JSON di kolom "isi" agar cocok dengan Apps Script lama.
-function normDraf(r){
-  let m=null; const s=String(r.isi==null?"":r.isi);
-  if(s.charAt(0)==="{"){ try{ m=JSON.parse(s); }catch(e){} }
-  const st=(m&&m.s)||r.status;
-  return {id:r.id,event:r.event,jenis:r.jenis,link:(m&&typeof m.u==="string")?m.u:s,
-    status:STATUS[st]?st:"proses",deadline:(m&&m.dl)||r.deadline||"",uploaded:(m&&m.up)||r.uploaded||"",savedAt:r.savedAt||""};
+
+/* ---------- anti data dobel ---------- */
+// simpan yang terbaru (id terbesar) untuk tiap kunci
+function uniqNewest(list,keyFn){ const m=new Map(); list.forEach(x=>{ const k=keyFn(x), o=m.get(k); if(!o||Number(x.id)>=Number(o.id)) m.set(k,x); }); return [...m.values()]; }
+const drafKey=d=>nkey(d.event)+"|"+nkey(d.jenis);
+const planKey=p=>nkey(String(p.tgl||"").slice(0,10))+"|"+nkey(p.platform)+"|"+nkey(p.judul);
+function uniqNames(a){ const m=new Map(); a.forEach(n=>{ const k=nkey(n); if(k&&!m.has(k)) m.set(k,n); }); return [...m.values()]; }
+function dedupeHist(h){ const seen=new Set(); return (h||[]).filter(e=>{ const k=nkey(e.nama)||("#"+e.id); if(seen.has(k)) return false; seen.add(k); return true; }); }
+function canonEvent(ev){ const k=nkey(ev); const f=[...state.history.map(e=>e.nama),...drafs.map(d=>d.event),...plans.map(p=>p.event)].find(n=>nkey(n)===k); return f||String(ev).trim().replace(/\s+/g," "); }
+function fillEvList(){ $("evList").innerHTML=uniqNames([...state.history.map(e=>e.nama),...drafs.map(d=>d.event),...plans.map(p=>p.event)]).sort(cmp).map(n=>`<option value="${esc(n)}">`).join(""); }
+
+/* ---------- ringkasan persentase per PIC ---------- */
+function picSumHtml(list,sel,doneKey){
+  const pics=sel?[sel]:PICS;
+  let out=pics.map(p=>{
+    const mine=list.filter(x=>x.pic===p), act=mine.filter(x=>x.status!=="batal"), done=act.filter(x=>x.status===doneKey).length, cx=mine.length-act.length;
+    const pct=act.length?Math.round(done/act.length*100):0;
+    return `<div class="ps"><div class="pst"><b>${esc(p)}</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%;${pct===100?"background:var(--ok)":""}"></i></div><div class="psm">${done} ${doneKey} dari ${act.length} aktif${cx?` · ${cx} cancel`:""}</div></div>`;
+  }).join("");
+  const nopic=list.filter(x=>!PICS.includes(x.pic)).length;
+  if(!sel&&nopic) out+=`<div class="psm" style="grid-column:1/-1">${nopic} item belum punya PIC (tidak masuk persentase)</div>`;
+  return out;
 }
-const toItem=d=>({id:d.id,event:d.event,jenis:d.jenis,isi:JSON.stringify({u:d.link,s:d.status,dl:d.deadline,up:d.uploaded}),savedAt:d.savedAt,status:d.status,deadline:d.deadline,uploaded:d.uploaded});
-const saveDraf=d=>api({action:"draf_save",item:toItem(d)});
-function getDraf(){
-  if(!role) return Promise.resolve();
-  return api({action:"draf_list"}).then(r=>{ drafs=(r.draf||[]).map(normDraf); renderDraf(); }).catch(e=>{ console.error("draf_list",e); toast("Gagal memuat list desain: "+(role==="viewer"&&e.message==="unauthorized"?"akses User Biasa belum diizinkan di Apps Script":errMsg(e)),6000); });
-}
-function deadlineChip(d){
-  if(d.status!=="proses") return "";
-  const dl=dayOf(d.deadline); if(!dl) return "";
+function dueChip(s,active){
+  if(!active) return "";
+  const dl=dayOf(s); if(!dl) return "";
   const t=new Date(); t.setHours(0,0,0,0);
   const df=Math.round((dl-t)/864e5);
   if(df<0) return `<span class="st late">Terlambat ${-df} hari</span>`;
   if(df===0) return `<span class="st soon">Hari ini</span>`;
   return `<span class="st ${df<=3?"soon":"fut"}">H-${df}</span>`;
 }
+
+/* ---------- List Desain ---------- */
+// Data tambahan (link, status, deadline, tgl upload, PIC) dibungkus JSON di kolom "isi" agar cocok dengan Apps Script.
+function normDraf(r){
+  let m=null; const s=String(r.isi==null?"":r.isi);
+  if(s.charAt(0)==="{"){ try{ m=JSON.parse(s); }catch(e){} }
+  const st=(m&&m.s)||r.status, pic=(m&&m.p)||r.pic;
+  return {id:r.id,event:r.event,jenis:r.jenis,link:(m&&typeof m.u==="string")?m.u:s,
+    status:STATUS[st]?st:"proses",pic:PICS.includes(pic)?pic:"",deadline:(m&&m.dl)||r.deadline||"",uploaded:(m&&m.up)||r.uploaded||"",savedAt:r.savedAt||""};
+}
+const toItem=d=>({id:d.id,event:d.event,jenis:d.jenis,isi:JSON.stringify({u:d.link,s:d.status,dl:d.deadline,up:d.uploaded,p:d.pic}),savedAt:d.savedAt,status:d.status,deadline:d.deadline,uploaded:d.uploaded,pic:d.pic});
+const saveDraf=d=>api({action:"draf_save",item:toItem(d)});
+function getDraf(){
+  if(!role) return Promise.resolve();
+  return api({action:"draf_list"}).then(r=>{ drafs=uniqNewest((r.draf||[]).map(normDraf),drafKey); renderDraf(); }).catch(e=>{ console.error("draf_list",e); toast("Gagal memuat list desain: "+(role==="viewer"&&e.message==="unauthorized"?"akses User Biasa belum diizinkan di Apps Script":errMsg(e)),6000); });
+}
 const statusBar=d=>`<div class="stbar"><span>Ubah status:</span><div class="seg" role="group" aria-label="Status ${esc(d.jenis)}">${Object.keys(STATUS).map(k=>`<button type="button" class="${k==="proses"?"p":k==="siap"?"s":"c"} ${d.status===k?"on":""}" data-a="status" data-v="${k}" aria-pressed="${d.status===k}">${STATUS[k]}</button>`).join("")}</div></div>`;
 function renderDraf(){
   if(!role) return;
   $("dtitle").textContent=role==="drafter"?"Draf Desain":"List Desain";
-  $("evList").innerHTML=[...new Set([...state.history.map(e=>e.nama),...drafs.map(d=>d.event)].filter(Boolean))].sort(cmp).map(n=>`<option value="${esc(n)}">`).join("");
-  const sel=$("dFilter"), f=sel.value, evs=[...new Set(drafs.map(d=>d.event))].sort(cmp);
+  fillEvList();
+  const sel=$("dFilter"), f=sel.value, evs=uniqNames(drafs.map(d=>d.event)).sort(cmp);
   sel.innerHTML='<option value="">Semua event</option>'+evs.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
   sel.value=evs.includes(f)?f:"";
-  const sf=$("dStat").value, q=$("dq").value.trim().toLowerCase();
-  const list=drafs.filter(d=>(!sel.value||d.event===sel.value)&&(!sf||d.status===sf)&&(!q||(d.event+" "+d.jenis+" "+d.link+" "+STATUS[d.status]).toLowerCase().includes(q)));
+  const pf=$("dPic").value, sf=$("dStat").value, q=$("dq").value.trim().toLowerCase();
+  const byEv=drafs.filter(d=>!sel.value||nkey(d.event)===nkey(sel.value));
+  $("dSum").innerHTML=byEv.length?picSumHtml(byEv,pf,"siap"):"";
+  const list=byEv.filter(d=>(!pf||d.pic===pf)&&(!sf||d.status===sf)&&(!q||(d.event+" "+d.jenis+" "+d.link+" "+d.pic+" "+STATUS[d.status]).toLowerCase().includes(q)));
   $("dcount").textContent=list.length;
   if(!list.length){ $("dList").innerHTML=`<div class="empty"><b>✏️</b>${role==="admin"?"Belum ada draf dari Drafter.":role==="drafter"?"Belum ada draf. Isi form di atas untuk menambah.":"Belum ada desain."}</div>`; return; }
   let out="";
-  [...new Set(list.map(d=>d.event))].sort(cmp).forEach(ev=>{
+  uniqNames(list.map(d=>d.event)).sort(cmp).forEach(ev=>{
     out+=`<h3 class="mh">${esc(ev)}</h3>`;
-    list.filter(d=>d.event===ev).sort((a,b)=>cmp(a.jenis,b.jenis)).forEach(d=>{
+    list.filter(d=>nkey(d.event)===nkey(ev)).sort((a,b)=>cmp(a.jenis,b.jenis)).forEach(d=>{
       out+=`<div class="dc ${d.status}" data-id="${d.id}"><div class="top"><span class="jn">${esc(d.jenis)}</span><span class="dst ${d.status}">${STATUS[d.status]}</span></div>
-        <div class="dmeta"><span>📤 Upload: <b>${esc(fmtD(d.uploaded)||d.savedAt||"-")}</b></span><span>⏰ Deadline: <b>${d.deadline?esc(fmtD(d.deadline)):"Belum diatur"}</b> ${deadlineChip(d)}</span><span>Diperbarui ${esc(d.savedAt||"")}</span></div>
+        <div class="dmeta"><span>👤 PIC: <b>${esc(d.pic||"Belum ada PIC")}</b></span><span>📤 Upload: <b>${esc(fmtD(d.uploaded)||d.savedAt||"-")}</b></span><span>⏰ Deadline: <b>${d.deadline?esc(fmtD(d.deadline)):"Belum diatur"}</b> ${dueChip(d.deadline,d.status==="proses")}</span><span>Diperbarui ${esc(d.savedAt||"")}</span></div>
         ${docBlock(d)}
         ${role==="admin"?statusBar(d):""}
         <div class="acts"><button data-a="copy">Salin link</button><span class="dronly" style="display:contents"><button data-a="edit">Edit</button><button class="del" data-a="del">Hapus</button></span></div></div>`;
@@ -671,28 +738,30 @@ function docBlock(d){
   const doc=!!docId(d.link);
   return `<div class="dlink"><a class="open" href="${esc(d.link.trim())}" target="_blank" rel="noopener noreferrer">📄 Buka draf</a>${doc?'<button type="button" data-a="prev">Pratinjau</button>':""}</div><div class="pv"></div>`;
 }
-function resetDForm(){ editId=null; $("dIsi").value=""; $("dJenis").value=""; $("dDl").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; }
+function resetDForm(){ editId=null; $("dIsi").value=""; $("dJenis").value=""; $("dDl").value=""; $("dPicIn").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; }
 $("dq").addEventListener("input",renderDraf);
 $("dFilter").addEventListener("change",renderDraf);
 $("dStat").addEventListener("change",renderDraf);
+$("dPic").addEventListener("change",renderDraf);
 $("dCancel").addEventListener("click",resetDForm);
 $("dSave").addEventListener("click",()=>{
-  const ev=$("dEvent").value.trim(), jn=$("dJenis").value.trim().toUpperCase(), link=$("dIsi").value.trim(), dl=$("dDl").value;
-  if(!ev||!jn||!link||!dl){ toast("Event, jenis desain, link draf, dan deadline wajib diisi"); return; }
+  const ev0=$("dEvent").value.trim(), jn=$("dJenis").value.trim().replace(/\s+/g," ").toUpperCase(), link=$("dIsi").value.trim(), dl=$("dDl").value, pic=$("dPicIn").value;
+  if(!ev0||!jn||!pic||!link||!dl){ toast("Event, jenis desain, PIC, link draf, dan deadline wajib diisi"); return; }
   if(!isUrl(link)){ toast("Isi draf harus berupa link yang diawali https://",4000); return; }
-  const old=drafs.find(x=>x.id===editId);
-  const item={id:editId||Date.now(),event:ev,jenis:jn,link,status:old?old.status:"proses",deadline:dl,uploaded:(old&&old.uploaded)||todayIso(),savedAt:nowStr()};
+  const ev=canonEvent(ev0), old=drafs.find(x=>x.id===editId);
+  const item={id:editId||Date.now(),event:ev,jenis:jn,link,pic,status:old?old.status:"proses",deadline:dl,uploaded:(old&&old.uploaded)||todayIso(),savedAt:nowStr()};
+  if(drafs.some(x=>x.id!==item.id&&drafKey(x)===drafKey(item))){ toast(`Draf ${jn} untuk "${ev}" sudah ada, tidak boleh double. Gunakan Edit pada draf yang ada.`,5000); return; }
   drafs=drafs.filter(d=>d.id!==item.id); drafs.push(item); resetDForm(); renderDraf();
   saveDraf(item).then(()=>{
     toast("Draf tersimpan ✓");
-  }).catch(e=>{ console.error("draf_save",e); toast("Gagal menyimpan draf: "+errMsg(e),6000); });
+  }).catch(e=>{ console.error("draf_save",e); toast("Gagal menyimpan draf: "+errMsg(e),6000); getDraf(); });
 });
 function setStatus(d,s){
   if(d.status===s) return;
   const old={status:d.status,savedAt:d.savedAt};
   d.status=s; d.savedAt=nowStr(); renderDraf();
   api({action:"draf_status",id:d.id,status:s,savedAt:d.savedAt}).then(()=>toast("Status diubah: "+STATUS[s]+" ✓")).catch(e=>{
-    console.error("draf_save status",e); d.status=old.status; d.savedAt=old.savedAt; renderDraf();
+    console.error("draf_status",e); d.status=old.status; d.savedAt=old.savedAt; renderDraf();
     toast("Gagal mengubah status: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000);
   });
 }
@@ -710,23 +779,94 @@ $("dList").addEventListener("click",e=>{
   if(a==="status"){ if(role==="admin") setStatus(d,b.dataset.v); return; }
   if(role!=="drafter") return;
   if(a==="edit"){
-    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.link; $("dDl").value=String(d.deadline||"").slice(0,10);
+    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.link; $("dDl").value=String(d.deadline||"").slice(0,10); $("dPicIn").value=d.pic||"";
     $("dCancel").hidden=false; $("dSave").textContent="Perbarui draf"; window.scrollTo({top:0,behavior:"smooth"}); $("dIsi").focus();
   }else if(a==="del"){
     drafs=drafs.filter(x=>x.id!==d.id); renderDraf();
-    api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(e=>{ console.error("draf_delete",e); toast("Gagal menghapus draf: "+errMsg(e),6000); });
+    api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(e=>{ console.error("draf_delete",e); toast("Gagal menghapus draf: "+errMsg(e),6000); getDraf(); });
+  }
+});
+
+/* ---------- Content Plan Digital Marketing ---------- */
+function normPlan(r){
+  return {id:r.id,tgl:String(r.tgl||"").slice(0,10),platform:String(r.platform||""),judul:String(r.judul||""),caption:String(r.caption||""),link:String(r.link||""),
+    event:String(r.event||""),pic:PICS.includes(r.pic)?r.pic:"",status:CPST[r.status]?r.status:"rencana",savedAt:r.savedAt||""};
+}
+function getPlan(){
+  if(!role) return Promise.resolve();
+  return api({action:"cp_list"}).then(r=>{ plans=uniqNewest((r.plan||[]).map(normPlan),planKey); renderPlan(); }).catch(e=>{ console.error("cp_list",e); toast("Gagal memuat Content Plan: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":e.message==="unauthorized"?"akses belum diizinkan di Apps Script":errMsg(e)),6000); });
+}
+const planStatusBar=p=>`<div class="stbar"><span>Ubah status:</span><div class="seg" role="group" aria-label="Status ${esc(p.judul)}">${Object.keys(CPST).map(k=>`<button type="button" class="${{rencana:"n",proses:"p",tayang:"s",batal:"c"}[k]} ${p.status===k?"on":""}" data-a="pst" data-v="${k}" aria-pressed="${p.status===k}">${CPST[k]}</button>`).join("")}</div></div>`;
+function renderPlan(){
+  if(!role) return;
+  fillEvList();
+  const ed=role==="admin"||role==="drafter";
+  const pf=$("pFPic").value, sf=$("pFSt").value, q=$("pq").value.trim().toLowerCase();
+  $("pSum").innerHTML=plans.length?picSumHtml(plans,pf,"tayang"):"";
+  const list=plans.filter(p=>(!pf||p.pic===pf)&&(!sf||p.status===sf)&&(!q||(p.judul+" "+p.caption+" "+p.platform+" "+p.event+" "+p.pic).toLowerCase().includes(q)))
+    .sort((a,b)=>String(a.tgl).localeCompare(String(b.tgl))||cmp(a.judul,b.judul));
+  $("pcount").textContent=list.length;
+  if(!list.length){ $("pList").innerHTML=`<div class="empty"><b>🗓️</b>${plans.length?"Tidak ada konten yang cocok.":ed?"Belum ada content plan. Isi form di atas untuk menambah.":"Belum ada content plan."}</div>`; return; }
+  let cur="", out="";
+  list.forEach(p=>{
+    const d=dayOf(p.tgl), mk=d?MON[d.getMonth()]+" "+d.getFullYear():"Tanpa tanggal";
+    if(mk!==cur){ cur=mk; out+=`<h3 class="mh">${esc(mk)}</h3>`; }
+    out+=`<div class="dc ${p.status}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span class="dst ${p.status}">${CPST[p.status]}</span></div>
+      <div class="dmeta"><span>📅 Tayang: <b>${esc(fmtD(p.tgl)||"-")}</b> ${dueChip(p.tgl,p.status==="rencana"||p.status==="proses")}</span><span>📱 <b>${esc(p.platform)}</b></span><span>👤 PIC: <b>${esc(p.pic||"Belum ada PIC")}</b></span>${p.event?`<span>🏷️ ${esc(p.event)}</span>`:""}<span>Diperbarui ${esc(p.savedAt||"")}</span></div>
+      ${p.caption?`<pre>${esc(p.caption)}</pre>`:""}
+      ${p.link&&isUrl(p.link)?`<div class="dlink"><a class="open" href="${esc(p.link.trim())}" target="_blank" rel="noopener noreferrer">🔗 Buka materi</a></div>`:""}
+      ${ed?planStatusBar(p):""}
+      <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div>`;
+  });
+  $("pList").innerHTML=out;
+}
+function resetPForm(){ planEditId=null; $("pJudul").value=""; $("pTgl").value=""; $("pCap").value=""; $("pLink").value=""; $("pCancel").hidden=true; $("pSave").textContent="Simpan konten"; }
+$("pq").addEventListener("input",renderPlan);
+$("pFPic").addEventListener("change",renderPlan);
+$("pFSt").addEventListener("change",renderPlan);
+$("pCancel").addEventListener("click",resetPForm);
+$("pSave").addEventListener("click",()=>{
+  const judul=$("pJudul").value.trim().replace(/\s+/g," "), tgl=$("pTgl").value, platform=$("pPlat").value, pic=$("pPic").value, ev0=$("pEvent").value.trim(), caption=$("pCap").value.trim(), link=$("pLink").value.trim();
+  if(!judul||!tgl||!platform||!pic){ toast("Judul, tanggal tayang, platform, dan PIC wajib diisi"); return; }
+  if(link&&!isUrl(link)){ toast("Link materi harus diawali https://",4000); return; }
+  const old=plans.find(x=>x.id===planEditId);
+  const item={id:planEditId||Date.now(),tgl,platform,judul,caption,link,event:ev0?canonEvent(ev0):"",pic,status:old?old.status:"rencana",savedAt:nowStr()};
+  if(plans.some(x=>x.id!==item.id&&planKey(x)===planKey(item))){ toast("Konten itu sudah ada (judul, tanggal, dan platform sama), tidak boleh double. Gunakan Edit.",5000); return; }
+  plans=plans.filter(x=>x.id!==item.id); plans.push(item); resetPForm(); renderPlan();
+  api({action:"cp_save",item}).then(()=>toast("Konten tersimpan ✓")).catch(e=>{ console.error("cp_save",e); toast("Gagal menyimpan konten: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000); getPlan(); });
+});
+function setPlanStatus(p,s){
+  if(p.status===s) return;
+  const old={status:p.status,savedAt:p.savedAt};
+  p.status=s; p.savedAt=nowStr(); renderPlan();
+  api({action:"cp_save",item:p}).then(()=>toast("Status diubah: "+CPST[s]+" ✓")).catch(e=>{
+    console.error("cp_save status",e); p.status=old.status; p.savedAt=old.savedAt; renderPlan(); toast("Gagal mengubah status: "+errMsg(e),6000);
+  });
+}
+$("pList").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-a]"); if(!b) return;
+  if(role!=="admin"&&role!=="drafter") return;
+  const p=plans.find(x=>x.id===+b.closest(".dc").dataset.id); if(!p) return;
+  const a=b.dataset.a;
+  if(a==="pst") setPlanStatus(p,b.dataset.v);
+  else if(a==="pedit"){
+    planEditId=p.id; $("pJudul").value=p.judul; $("pTgl").value=p.tgl; $("pPlat").value=p.platform; $("pPic").value=p.pic||""; $("pEvent").value=p.event; $("pCap").value=p.caption; $("pLink").value=p.link;
+    $("pCancel").hidden=false; $("pSave").textContent="Perbarui konten"; window.scrollTo({top:0,behavior:"smooth"}); $("pJudul").focus();
+  }else if(a==="pdel"){
+    plans=plans.filter(x=>x.id!==p.id); renderPlan();
+    api({action:"cp_delete",id:p.id}).then(()=>toast("Konten dihapus")).catch(e=>{ console.error("cp_delete",e); toast("Gagal menghapus konten: "+errMsg(e),6000); getPlan(); });
   }
 });
 function applyRole(){
   const bc=document.body.classList;
   bc.toggle("ro",role==="viewer"); bc.toggle("r-admin",role==="admin"); bc.toggle("rd",role==="drafter");
-  if(role==="admin"||role==="drafter") setView(role==="drafter"?"draf":view); else if(role==="viewer") setView(view==="draf"?"draf":"home"); else bc.remove("v-home","v-prep","v-draf");
+  if(role==="admin") setView(view); else if(role==="drafter") setView(view==="plan"?"plan":"draf"); else if(role==="viewer") setView(view==="draf"||view==="plan"?view:"home"); else bc.remove("v-home","v-prep","v-draf","v-plan");
   document.querySelector('#nav [data-v="home"]').textContent=role==="viewer"?"Daftar Event":"Riwayat";
   $("nama").disabled=$("tgl").disabled=!isAdmin();
   $("login").classList.toggle("show",!role);
   $("who").innerHTML = role ? `Masuk sebagai <b>${{admin:"Desain Grafis",drafter:"Drafter",viewer:"User Biasa"}[role]}</b> <button id="logout">Keluar</button>` : "";
   if(role) $("logout").addEventListener("click",logout);
-  clearInterval(poller); if(role) poller=setInterval(()=>{ if(role==="viewer") pull(); if(view==="draf") getDraf(); },30000);
+  clearInterval(poller); if(role) poller=setInterval(()=>{ if(role==="viewer") pull(); if(view==="draf") getDraf(); if(view==="plan") getPlan(); },30000);
   renderAll();
 }
 function logout(){
