@@ -179,10 +179,10 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .v-home .grid,.v-prep .grid{grid-template-columns:1fr;max-width:820px;margin-left:auto;margin-right:auto}
 .r-admin .dronly{display:none!important}
 .dform{display:grid;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
-.dform input,.dform textarea,#dFilter{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.dform input,.dform textarea,#dFilter,#dStat{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
 .dform textarea{resize:vertical}
 .drow{display:flex;gap:8px}
-.dtools{display:grid;grid-template-columns:1fr 210px;gap:8px}
+.dtools{display:grid;grid-template-columns:1fr 190px 140px;gap:8px}
 @media(max-width:560px){.dtools{grid-template-columns:1fr}}
 .dc{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--field);margin-top:10px}
 .dc .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
@@ -195,6 +195,19 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .dlink a.open{background:var(--pri-soft);color:var(--pri);border-color:transparent}
 .dprev{width:100%;height:440px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:4px}
 .dhint{font-size:12px;color:var(--mute);margin:-2px 2px 0}
+.dfield label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:4px}
+.dst{font-size:12px;font-weight:700;padding:3px 11px;border-radius:99px;white-space:nowrap}
+.dst.proses{background:var(--na-soft);color:var(--na)}.dst.siap{background:var(--ok-soft);color:var(--ok)}.dst.batal{background:var(--bad-soft);color:var(--bad)}
+.dc.batal .jn{text-decoration:line-through;opacity:.65}
+.dmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:12.5px;color:var(--mute);font-weight:600;margin-top:8px}
+.dmeta b{color:var(--ink);font-weight:700}
+.st.late{background:var(--bad-soft);color:var(--bad)}
+.stbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.stbar>span{font-size:12px;font-weight:700;color:var(--mute)}
+.seg button.on.c{background:var(--bad-soft);color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.ro .dronly{display:none!important}
+.ro .nav{display:flex}.ro .nav [data-v="prep"]{display:none}
+.ro.v-draf .vhead,.ro.v-draf #events{display:none!important}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -237,10 +250,11 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
       <input id="dJenis" list="jnList" placeholder="Jenis desain, mis. FLYER" maxlength="60">
       <input id="dIsi" type="url" inputmode="url" placeholder="Tempel link draf (Google Doc, Drive, Canva, dll.)" maxlength="500">
       <p class="dhint">Atur akses link ke “Siapa saja yang memiliki link” supaya Desain Grafis bisa membukanya.</p>
+      <div class="dfield"><label for="dDl">Deadline desain</label><input id="dDl" type="date"></div>
       <div class="drow"><button class="btn pri" id="dSave">Simpan draf</button><button class="btn ghost" id="dCancel" hidden>Batal edit</button></div>
       <datalist id="evList"></datalist><datalist id="jnList"></datalist>
     </div>
-    <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select></div>
+    <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select><select id="dStat" aria-label="Filter status"><option value="">Semua status</option><option value="proses">Proses</option><option value="siap">Siap</option><option value="batal">Cancel</option></select></div>
     <div id="dList"></div>
   </div></section>
   <div class="grid">
@@ -344,7 +358,7 @@ const apiReady = () => API_URL.startsWith("https://");
 function api(body){
   if(!apiReady()) return Promise.reject(new Error("API_URL belum diisi"));
   // string biasa = text/plain, tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
-  const payload=JSON.stringify(Object.assign({pass},body)); return fetch(API_URL,{method:"POST",body:payload,keepalive:payload.length<60000}).then(r=>r.json()).then(r=>{ if(!r.ok){ if(r.error==="unauthorized"&&(role==="admin"||role==="drafter")&&body.action!=="login"){ logout(); toast("Sesi admin tidak valid, silakan masuk lagi"); } throw new Error(r.error||"gagal"); } return r; });
+  const payload=JSON.stringify(Object.assign({pass},body)); return fetch(API_URL,{method:"POST",body:payload,keepalive:payload.length<60000}).then(r=>r.json()).then(r=>{ if(!r.ok){ if(r.error==="unauthorized"&&(role==="admin"||role==="drafter")&&body.action!=="login"&&!(role==="admin"&&body.action==="draf_save")){ logout(); toast("Sesi admin tidak valid, silakan masuk lagi"); } throw new Error(r.error||"gagal"); } return r; });
 }
 let syncTimer=null;
 function sendActive(){
@@ -592,30 +606,56 @@ function setView(v){
 }
 $("nav").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(b) setView(b.dataset.v); });
 
+const STATUS={proses:"Proses",siap:"Siap",batal:"Cancel"};
 let drafs=[], editId=null;
 const cmp=(a,b)=>String(a).localeCompare(String(b),"id",{sensitivity:"base"});
-function getDraf(){
-  if(role!=="admin"&&role!=="drafter") return Promise.resolve();
-  return api({action:"draf_list"}).then(r=>{ drafs=r.draf||[]; renderDraf(); }).catch(e=>{ console.error("draf_list",e); toast("Gagal memuat draf: "+errMsg(e),6000); });
+const todayIso=()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const dayOf=s=>{ if(!s) return null; const d=new Date(String(s).slice(0,10)+"T00:00:00"); return isNaN(d)?null:d; };
+const fmtD=s=>{ const d=dayOf(s); return d?d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}):""; };
+// Data tambahan (link, status, deadline, tgl upload) dibungkus JSON di kolom "isi" agar cocok dengan Apps Script lama.
+function normDraf(r){
+  let m=null; const s=String(r.isi==null?"":r.isi);
+  if(s.charAt(0)==="{"){ try{ m=JSON.parse(s); }catch(e){} }
+  const st=(m&&m.s)||r.status;
+  return {id:r.id,event:r.event,jenis:r.jenis,link:(m&&typeof m.u==="string")?m.u:s,
+    status:STATUS[st]?st:"proses",deadline:(m&&m.dl)||r.deadline||"",uploaded:(m&&m.up)||r.uploaded||"",savedAt:r.savedAt||""};
 }
+const toItem=d=>({id:d.id,event:d.event,jenis:d.jenis,isi:JSON.stringify({u:d.link,s:d.status,dl:d.deadline,up:d.uploaded}),savedAt:d.savedAt,status:d.status,deadline:d.deadline,uploaded:d.uploaded});
+const saveDraf=d=>api({action:"draf_save",item:toItem(d)});
+function getDraf(){
+  if(!role) return Promise.resolve();
+  return api({action:"draf_list"}).then(r=>{ drafs=(r.draf||[]).map(normDraf); renderDraf(); }).catch(e=>{ console.error("draf_list",e); toast("Gagal memuat list desain: "+(role==="viewer"&&e.message==="unauthorized"?"akses User Biasa belum diizinkan di Apps Script":errMsg(e)),6000); });
+}
+function deadlineChip(d){
+  if(d.status!=="proses") return "";
+  const dl=dayOf(d.deadline); if(!dl) return "";
+  const t=new Date(); t.setHours(0,0,0,0);
+  const df=Math.round((dl-t)/864e5);
+  if(df<0) return `<span class="st late">Terlambat ${-df} hari</span>`;
+  if(df===0) return `<span class="st soon">Hari ini</span>`;
+  return `<span class="st ${df<=3?"soon":"fut"}">H-${df}</span>`;
+}
+const statusBar=d=>`<div class="stbar"><span>Ubah status:</span><div class="seg" role="group" aria-label="Status ${esc(d.jenis)}">${Object.keys(STATUS).map(k=>`<button type="button" class="${k==="proses"?"p":k==="siap"?"s":"c"} ${d.status===k?"on":""}" data-a="status" data-v="${k}" aria-pressed="${d.status===k}">${STATUS[k]}</button>`).join("")}</div></div>`;
 function renderDraf(){
-  if(role!=="admin"&&role!=="drafter") return;
-  $("dtitle").textContent=role==="admin"?"List Desain":"Draf Desain";
+  if(!role) return;
+  $("dtitle").textContent=role==="drafter"?"Draf Desain":"List Desain";
   $("evList").innerHTML=[...new Set([...state.history.map(e=>e.nama),...drafs.map(d=>d.event)].filter(Boolean))].sort(cmp).map(n=>`<option value="${esc(n)}">`).join("");
   $("jnList").innerHTML=allItems().map(n=>`<option value="${esc(n)}">`).join("");
   const sel=$("dFilter"), f=sel.value, evs=[...new Set(drafs.map(d=>d.event))].sort(cmp);
   sel.innerHTML='<option value="">Semua event</option>'+evs.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
   sel.value=evs.includes(f)?f:"";
-  const q=$("dq").value.trim().toLowerCase();
-  const list=drafs.filter(d=>(!sel.value||d.event===sel.value)&&(!q||(d.event+" "+d.jenis+" "+d.isi).toLowerCase().includes(q)));
+  const sf=$("dStat").value, q=$("dq").value.trim().toLowerCase();
+  const list=drafs.filter(d=>(!sel.value||d.event===sel.value)&&(!sf||d.status===sf)&&(!q||(d.event+" "+d.jenis+" "+d.link+" "+STATUS[d.status]).toLowerCase().includes(q)));
   $("dcount").textContent=list.length;
-  if(!list.length){ $("dList").innerHTML=`<div class="empty"><b>✏️</b>${role==="admin"?"Belum ada draf dari Drafter.":"Belum ada draf. Isi form di atas untuk menambah."}</div>`; return; }
+  if(!list.length){ $("dList").innerHTML=`<div class="empty"><b>✏️</b>${role==="admin"?"Belum ada draf dari Drafter.":role==="drafter"?"Belum ada draf. Isi form di atas untuk menambah.":"Belum ada desain."}</div>`; return; }
   let out="";
   [...new Set(list.map(d=>d.event))].sort(cmp).forEach(ev=>{
     out+=`<h3 class="mh">${esc(ev)}</h3>`;
     list.filter(d=>d.event===ev).sort((a,b)=>cmp(a.jenis,b.jenis)).forEach(d=>{
-      out+=`<div class="dc" data-id="${d.id}"><div class="top"><span class="jn">${esc(d.jenis)}</span><span class="m">Diperbarui ${esc(d.savedAt||"")}</span></div>
+      out+=`<div class="dc ${d.status}" data-id="${d.id}"><div class="top"><span class="jn">${esc(d.jenis)}</span><span class="dst ${d.status}">${STATUS[d.status]}</span></div>
+        <div class="dmeta"><span>📤 Upload: <b>${esc(fmtD(d.uploaded)||d.savedAt||"-")}</b></span><span>⏰ Deadline: <b>${d.deadline?esc(fmtD(d.deadline)):"Belum diatur"}</b> ${deadlineChip(d)}</span><span>Diperbarui ${esc(d.savedAt||"")}</span></div>
         ${docBlock(d)}
+        ${role==="admin"?statusBar(d):""}
         <div class="acts"><button data-a="copy">Salin link</button><span class="dronly" style="display:contents"><button data-a="edit">Edit</button><button class="del" data-a="del">Hapus</button></span></div></div>`;
     });
   });
@@ -628,39 +668,52 @@ function copyText(t){
 const docId=u=>{ const m=/^https:\/\/docs\.google\.com\/document\/(?:u\/\d+\/)?d\/([\w-]+)/.exec(String(u||"").trim()); return m?m[1]:""; };
 const isUrl=u=>/^https?:\/\/[^\s]+$/i.test(String(u||"").trim());
 function docBlock(d){
-  if(!isUrl(d.isi)) return `<pre>${esc(d.isi)}</pre>`; // draf lama berupa teks
-  const doc=!!docId(d.isi);
-  return `<div class="dlink"><a class="open" href="${esc(d.isi.trim())}" target="_blank" rel="noopener noreferrer">${doc?"📄 Buka Google Doc":"🔗 Buka link"}</a>${doc?'<button type="button" data-a="prev">Pratinjau</button>':""}</div><div class="pv"></div>`;
+  if(!isUrl(d.link)) return `<pre>${esc(d.link)}</pre>`; // draf lama berupa teks
+  const doc=!!docId(d.link);
+  return `<div class="dlink"><a class="open" href="${esc(d.link.trim())}" target="_blank" rel="noopener noreferrer">📄 Buka draf</a>${doc?'<button type="button" data-a="prev">Pratinjau</button>':""}</div><div class="pv"></div>`;
 }
-function resetDForm(){ editId=null; $("dIsi").value=""; $("dJenis").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; }
+function resetDForm(){ editId=null; $("dIsi").value=""; $("dJenis").value=""; $("dDl").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; }
 $("dq").addEventListener("input",renderDraf);
 $("dFilter").addEventListener("change",renderDraf);
+$("dStat").addEventListener("change",renderDraf);
 $("dCancel").addEventListener("click",resetDForm);
 $("dSave").addEventListener("click",()=>{
-  const ev=$("dEvent").value.trim(), jn=$("dJenis").value.trim().toUpperCase(), isi=$("dIsi").value.trim();
-  if(!ev||!jn||!isi){ toast("Event, jenis desain, dan link draf wajib diisi"); return; }
-  if(!isUrl(isi)){ toast("Isi draf harus berupa link yang diawali https://",4000); return; }
-  const item={id:editId||Date.now(),event:ev,jenis:jn,isi,savedAt:nowStr()};
+  const ev=$("dEvent").value.trim(), jn=$("dJenis").value.trim().toUpperCase(), link=$("dIsi").value.trim(), dl=$("dDl").value;
+  if(!ev||!jn||!link||!dl){ toast("Event, jenis desain, link draf, dan deadline wajib diisi"); return; }
+  if(!isUrl(link)){ toast("Isi draf harus berupa link yang diawali https://",4000); return; }
+  const old=drafs.find(x=>x.id===editId);
+  const item={id:editId||Date.now(),event:ev,jenis:jn,link,status:old?old.status:"proses",deadline:dl,uploaded:(old&&old.uploaded)||todayIso(),savedAt:nowStr()};
   drafs=drafs.filter(d=>d.id!==item.id); drafs.push(item); resetDForm(); renderDraf();
-  api({action:"draf_save",item}).then(()=>{
+  saveDraf(item).then(()=>{
     toast("Draf tersimpan ✓");
   }).catch(e=>{ console.error("draf_save",e); toast("Gagal menyimpan draf: "+errMsg(e),6000); });
 });
+function setStatus(d,s){
+  if(d.status===s) return;
+  const old={status:d.status,savedAt:d.savedAt};
+  d.status=s; d.savedAt=nowStr(); renderDraf();
+  saveDraf(d).then(()=>toast("Status diubah: "+STATUS[s]+" ✓")).catch(e=>{
+    console.error("draf_save status",e); d.status=old.status; d.savedAt=old.savedAt; renderDraf();
+    toast("Gagal mengubah status: "+(e.message==="unauthorized"?"Apps Script belum mengizinkan Desain Grafis menyimpan":errMsg(e)),6000);
+  });
+}
 $("dList").addEventListener("click",e=>{
   const b=e.target.closest("button[data-a]"); if(!b) return;
   const d=drafs.find(x=>x.id===+b.closest(".dc").dataset.id); if(!d) return;
-  if(b.dataset.a==="prev"){
-    const box=b.closest(".dc").querySelector(".pv"), id=docId(d.isi);
+  const a=b.dataset.a;
+  if(a==="prev"){
+    const box=b.closest(".dc").querySelector(".pv"), id=docId(d.link);
     if(box.firstChild){ box.innerHTML=""; b.textContent="Pratinjau"; }
     else if(id){ box.innerHTML=`<iframe class="dprev" src="https://docs.google.com/document/d/${id}/preview" loading="lazy"></iframe>`; b.textContent="Tutup pratinjau"; }
     return;
   }
-  if(b.dataset.a==="copy"){ copyText(d.isi).then(()=>toast("Link draf disalin")); }
-  else if(role!=="drafter") return;
-  else if(b.dataset.a==="edit"){
-    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.isi;
+  if(a==="copy"){ copyText(d.link).then(()=>toast("Link draf disalin")); return; }
+  if(a==="status"){ if(role==="admin") setStatus(d,b.dataset.v); return; }
+  if(role!=="drafter") return;
+  if(a==="edit"){
+    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.link; $("dDl").value=String(d.deadline||"").slice(0,10);
     $("dCancel").hidden=false; $("dSave").textContent="Perbarui draf"; window.scrollTo({top:0,behavior:"smooth"}); $("dIsi").focus();
-  }else{
+  }else if(a==="del"){
     drafs=drafs.filter(x=>x.id!==d.id); renderDraf();
     api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(e=>{ console.error("draf_delete",e); toast("Gagal menghapus draf: "+errMsg(e),6000); });
   }
@@ -668,12 +721,13 @@ $("dList").addEventListener("click",e=>{
 function applyRole(){
   const bc=document.body.classList;
   bc.toggle("ro",role==="viewer"); bc.toggle("r-admin",role==="admin"); bc.toggle("rd",role==="drafter");
-  if(role==="admin"||role==="drafter") setView(role==="drafter"?"draf":view); else bc.remove("v-home","v-prep","v-draf");
+  if(role==="admin"||role==="drafter") setView(role==="drafter"?"draf":view); else if(role==="viewer") setView(view==="draf"?"draf":"home"); else bc.remove("v-home","v-prep","v-draf");
+  document.querySelector('#nav [data-v="home"]').textContent=role==="viewer"?"Daftar Event":"Riwayat";
   $("nama").disabled=$("tgl").disabled=!isAdmin();
   $("login").classList.toggle("show",!role);
   $("who").innerHTML = role ? `Masuk sebagai <b>${{admin:"Desain Grafis",drafter:"Drafter",viewer:"User Biasa"}[role]}</b> <button id="logout">Keluar</button>` : "";
   if(role) $("logout").addEventListener("click",logout);
-  clearInterval(poller); if(role) poller=setInterval(()=>{ if(role==="viewer") pull(); else if(view==="draf") getDraf(); },30000);
+  clearInterval(poller); if(role) poller=setInterval(()=>{ if(role==="viewer") pull(); if(view==="draf") getDraf(); },30000);
   renderAll();
 }
 function logout(){
