@@ -247,12 +247,12 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
     <h2><span id="dtitle">List Desain</span><span class="pill" id="dcount">0</span></h2>
     <div class="dronly dform">
       <input id="dEvent" list="evList" placeholder="Event / kompetisi" maxlength="80">
-      <input id="dJenis" list="jnList" placeholder="Jenis desain, mis. FLYER" maxlength="60">
+      <input id="dJenis" placeholder="Ketik jenis desain, mis. FLYER" maxlength="60">
       <input id="dIsi" type="url" inputmode="url" placeholder="Tempel link draf (Google Doc, Drive, Canva, dll.)" maxlength="500">
       <p class="dhint">Atur akses link ke “Siapa saja yang memiliki link” supaya Desain Grafis bisa membukanya.</p>
       <div class="dfield"><label for="dDl">Deadline desain</label><input id="dDl" type="date"></div>
       <div class="drow"><button class="btn pri" id="dSave">Simpan draf</button><button class="btn ghost" id="dCancel" hidden>Batal edit</button></div>
-      <datalist id="evList"></datalist><datalist id="jnList"></datalist>
+      <datalist id="evList"></datalist>
     </div>
     <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select><select id="dStat" aria-label="Filter status"><option value="">Semua status</option><option value="proses">Proses</option><option value="siap">Siap</option><option value="batal">Cancel</option></select></div>
     <div id="dList"></div>
@@ -358,7 +358,7 @@ const apiReady = () => API_URL.startsWith("https://");
 function api(body){
   if(!apiReady()) return Promise.reject(new Error("API_URL belum diisi"));
   // string biasa = text/plain, tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
-  const payload=JSON.stringify(Object.assign({pass},body)); return fetch(API_URL,{method:"POST",body:payload,keepalive:payload.length<60000}).then(r=>r.json()).then(r=>{ if(!r.ok){ if(r.error==="unauthorized"&&(role==="admin"||role==="drafter")&&body.action!=="login"&&!(role==="admin"&&body.action==="draf_save")){ logout(); toast("Sesi admin tidak valid, silakan masuk lagi"); } throw new Error(r.error||"gagal"); } return r; });
+  const payload=JSON.stringify(Object.assign({pass},body)); return fetch(API_URL,{method:"POST",body:payload,keepalive:payload.length<60000}).then(r=>r.json()).then(r=>{ if(!r.ok){ if(r.error==="unauthorized"&&(role==="admin"||role==="drafter")&&body.action!=="login"){ logout(); toast("Sesi admin tidak valid, silakan masuk lagi"); } throw new Error(r.error||"gagal"); } return r; });
 }
 let syncTimer=null;
 function sendActive(){
@@ -640,7 +640,6 @@ function renderDraf(){
   if(!role) return;
   $("dtitle").textContent=role==="drafter"?"Draf Desain":"List Desain";
   $("evList").innerHTML=[...new Set([...state.history.map(e=>e.nama),...drafs.map(d=>d.event)].filter(Boolean))].sort(cmp).map(n=>`<option value="${esc(n)}">`).join("");
-  $("jnList").innerHTML=allItems().map(n=>`<option value="${esc(n)}">`).join("");
   const sel=$("dFilter"), f=sel.value, evs=[...new Set(drafs.map(d=>d.event))].sort(cmp);
   sel.innerHTML='<option value="">Semua event</option>'+evs.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
   sel.value=evs.includes(f)?f:"";
@@ -692,9 +691,9 @@ function setStatus(d,s){
   if(d.status===s) return;
   const old={status:d.status,savedAt:d.savedAt};
   d.status=s; d.savedAt=nowStr(); renderDraf();
-  saveDraf(d).then(()=>toast("Status diubah: "+STATUS[s]+" ✓")).catch(e=>{
+  api({action:"draf_status",id:d.id,status:s,savedAt:d.savedAt}).then(()=>toast("Status diubah: "+STATUS[s]+" ✓")).catch(e=>{
     console.error("draf_save status",e); d.status=old.status; d.savedAt=old.savedAt; renderDraf();
-    toast("Gagal mengubah status: "+(e.message==="unauthorized"?"Apps Script belum mengizinkan Desain Grafis menyimpan":errMsg(e)),6000);
+    toast("Gagal mengubah status: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000);
   });
 }
 $("dList").addEventListener("click",e=>{
