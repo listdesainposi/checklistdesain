@@ -71,28 +71,30 @@ button{font:inherit;cursor:pointer}
 .chip em{font-style:normal;opacity:.7;margin-left:3px}
 
 /* items */
-ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 @media(max-width:560px){ul.list{grid-template-columns:1fr}}
-.item{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:14px;background:var(--card);transition:background .2s,border-color .2s}
-.item:hover{border-color:var(--pri)}
-.item label{flex:1;display:flex;align-items:center;gap:11px;padding:11px 12px;cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;min-width:0}
-.item label span.t{overflow-wrap:anywhere}
-.item input{position:absolute;opacity:0;pointer-events:none}
-.box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:.2s}
-.box svg{width:13px;height:13px;stroke:#fff;stroke-width:3.2;fill:none;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .25s}
-.item:focus-within{outline:2px solid var(--pri);outline-offset:1px}
+.item{display:flex;flex-direction:column;gap:9px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:11px 12px;transition:background .2s,border-color .2s}
+.item:hover,.item:focus-within{border-color:var(--pri)}
+.irow{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.item .t{font-size:13.5px;font-weight:700;overflow-wrap:anywhere;min-width:0;padding-top:4px}
+.seg{display:inline-flex;align-self:flex-start;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:none;color:var(--mute);font-size:12.5px;font-weight:700;padding:5px 14px;border-radius:7px;transition:.15s}
+.seg button:disabled{cursor:default}
+.seg button.on.p{background:var(--na-soft);color:var(--na);box-shadow:inset 0 0 0 1px var(--na)}
+.seg button.on.s{background:var(--ok-soft);color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
 .item.done{background:var(--ok-soft);border-color:transparent}
-.item.done .box{background:var(--ok);border-color:var(--ok)}
-.item.done .box svg{stroke-dashoffset:0}
-.item.done .t{color:var(--mute);text-decoration:line-through}
+.item.done .note{background:var(--card)}
 .item.na{background:var(--field);border-style:dashed}
-.item.na label{cursor:default;opacity:.55}
-.item.na .box{opacity:.4}
-.item.na .t:after{content:"Tidak ada";margin-left:8px;font-size:11px;font-weight:700;color:var(--na);background:var(--na-soft);padding:2px 7px;border-radius:6px;text-decoration:none;display:inline-block}
-.side{display:flex;align-items:center;gap:2px;padding-right:6px}
+.item.na .t{opacity:.6}
+.item.na .seg{opacity:.45}
+.item.na .t:after{content:"Tidak ada";margin-left:8px;font-size:11px;font-weight:700;color:var(--na);background:var(--na-soft);padding:2px 7px;border-radius:6px;display:inline-block}
+.note{width:100%;min-height:38px;resize:none;overflow:hidden;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink);font:inherit;font-size:12.5px;line-height:1.45}
+.note:disabled{opacity:.75}
+.side{display:flex;align-items:center;gap:2px;flex:none}
 .mini{border:0;background:none;color:var(--mute);font-size:11.5px;font-weight:700;padding:5px 7px;border-radius:8px}
 .mini:hover{background:var(--pri-soft);color:var(--pri)}
 .item.na .mini.nab{color:var(--na);background:var(--na-soft)}
+.nts{margin-top:4px}.nt{font-size:12.5px;color:var(--mute);margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}.nt b{color:var(--ink)}
 .mini.rm:hover{background:var(--bad-soft);color:var(--bad)}
 
 .add{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
@@ -188,7 +190,6 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .dc pre{white-space:pre-wrap;font:inherit;font-size:13.5px;margin:8px 0;overflow-wrap:anywhere}
 .dc .m{font-size:12px;color:var(--mute)}
 .ro .add,.ro .actions,.ro #newComp,.ro .mini,.ro .acts{display:none!important}
-.ro .item label{cursor:default}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -239,10 +240,10 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
   <div class="grid">
     <section class="card" id="mainCard">
       <h2>Persiapan Kompetisi <span class="sync" id="sync">Tersimpan otomatis</span></h2>
-      <input class="search" id="q" type="search" placeholder="Cari item persiapan…" aria-label="Cari item">
+      <input class="search" id="q" type="search" placeholder="Cari item atau keterangan…" aria-label="Cari item">
       <div class="tools" id="filters">
         <button class="chip on" data-f="all">Semua<em id="c-all"></em></button>
-        <button class="chip" data-f="todo">Belum<em id="c-todo"></em></button>
+        <button class="chip" data-f="todo">Proses<em id="c-todo"></em></button>
         <button class="chip" data-f="done">Selesai<em id="c-done"></em></button>
         <button class="chip" data-f="na">Tidak ada<em id="c-na"></em></button>
       </div>
@@ -254,10 +255,10 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
       </div>
       <div class="actions">
         <button class="btn pri" id="save">Simpan ke riwayat</button>
-        <button class="btn reset" id="reset">Reset centang</button>
+        <button class="btn reset" id="reset">Reset status</button>
       </div>
       <div class="confirm" id="confirm">
-        <span>Semua centang dan tanda "tidak ada" akan dihapus. Lanjutkan reset?</span>
+        <span>Semua status dikembalikan ke Proses, tanda "tidak ada" dan semua keterangan dihapus. Lanjutkan reset?</span>
         <span class="b"><button class="n" id="no">Batal</button><button class="y" id="yes">Ya, reset</button></span>
       </div>
     </section>
@@ -296,10 +297,11 @@ const ITEMS = [
 const KEY = "cek-kompetisi-v1";
 // URL Web App Google Apps Script (berakhiran /exec)
 const API_URL = "https://script.google.com/macros/s/AKfycbxE1qQZxkiEIjANMDSSqvT2Dym4bpNAwEQihphGKgpRgQOH2QvGhHY9vMev61OIUnCD/exec";
+const NOTES = "__notes"; // keterangan per item, disimpan di objek "checked" juga (tanpa ubah Apps Script)
 const CUSTOM = "__custom"; // daftar item buatan sendiri disimpan di dalam objek "checked" agar cocok dengan backend lama
 let mem = null;
 // checked[nama] = true (selesai) | "na" (tidak ada di kompetisi ini)
-let state = { nama:"", tgl:"", checked:{}, custom:[], history:[] };
+let state = { nama:"", tgl:"", checked:{}, custom:[], notes:{}, history:[] };
 let filter = "all", query = "";
 const RK="cek-role", PK="cek-pass";
 let role="", pass="", poller=null;
@@ -312,8 +314,8 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sortId = a => [...new Set(a)].sort((x,y)=>x.localeCompare(y,"id",{sensitivity:"base"}));
 const allItems = (custom=state.custom) => sortId([...ITEMS,...custom]);
-const pack = (checked,custom) => Object.assign({}, checked, {[CUSTOM]:custom});
-function unpack(c){ c = Object.assign({}, c||{}); const cu = Array.isArray(c[CUSTOM])?c[CUSTOM]:[]; delete c[CUSTOM]; return {checked:c, custom:cu}; }
+const pack = (checked,custom,notes=state.notes) => Object.assign({}, checked, {[CUSTOM]:custom,[NOTES]:notes});
+function unpack(c){ c = Object.assign({}, c||{}); const cu = Array.isArray(c[CUSTOM])?c[CUSTOM]:[]; const nt = (c[NOTES]&&typeof c[NOTES]==="object"&&!Array.isArray(c[NOTES]))?Object.assign({},c[NOTES]):{}; delete c[CUSTOM]; delete c[NOTES]; return {checked:c, custom:cu, notes:nt}; }
 const nowStr = () => new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?"":d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}); }
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),2200); }
@@ -323,6 +325,7 @@ function load(){
   try{ const r=localStorage.getItem(KEY); if(r) state=Object.assign(state,JSON.parse(r)); }
   catch(e){ if(mem) state=mem; }
   if(!Array.isArray(state.custom)) state.custom=[];
+  if(!state.notes||typeof state.notes!=="object") state.notes={};
 }
 const apiReady = () => API_URL.startsWith("https://");
 function api(body){
@@ -354,7 +357,7 @@ async function pull(){
   try{
     const d = await (await fetch(API_URL)).json();
     const u = unpack(d.checked);
-    state.nama=d.nama||""; state.tgl=d.tgl||""; state.checked=u.checked;
+    state.nama=d.nama||""; state.tgl=d.tgl||""; state.checked=u.checked; state.notes=u.notes;
     state.custom = sortId([...state.custom,...u.custom]);
     state.history=(d.history||[]);
     try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
@@ -370,6 +373,7 @@ function stats(checked=state.checked, items=allItems()){
   return {done,na,total,all:items.length,percent: total? Math.round(done/total*100):0};
 }
 
+function autoSize(t){ t.style.height="auto"; if(t.scrollHeight>0) t.style.height=t.scrollHeight+2+"px"; }
 function renderList(){
   const ul=$("list"); ul.innerHTML="";
   const q=query.trim().toLowerCase();
@@ -378,36 +382,47 @@ function renderList(){
     if(filter==="todo" && (on||isNa)) return;
     if(filter==="done" && !on) return;
     if(filter==="na" && !isNa) return;
-    if(q && !name.toLowerCase().includes(q)) return;
-    const custom=state.custom.includes(name);
+    if(q && !(name+" "+(state.notes[name]||"")).toLowerCase().includes(q)) return;
+    const custom=state.custom.includes(name), lock=isNa||!isAdmin();
     const li=document.createElement("li");
     li.innerHTML=`<div class="item ${on?"done":""} ${isNa?"na":""}">
-      <label><input type="checkbox" ${on?"checked":""} ${isNa||!isAdmin()?"disabled":""}>
-        <span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg></span>
-        <span class="t">${esc(name)}</span></label>
-      <span class="side">
-        <button class="mini nab" data-a="na" title="${isNa?"Aktifkan kembali item ini":"Tandai: tidak ada di kompetisi ini"}">${isNa?"Aktifkan":"Tidak ada"}</button>
-        ${custom?`<button class="mini rm" data-a="rm" title="Hapus item" aria-label="Hapus ${esc(name)}">✕</button>`:""}
-      </span></div>`;
-    li.querySelector("input").addEventListener("change",e=>{
-      if(e.target.checked) state.checked[name]=true; else delete state.checked[name];
-      persist(); renderAll();
+      <div class="irow"><span class="t">${esc(name)}</span>
+        <span class="side">
+          <button class="mini nab" data-a="na" title="${isNa?"Aktifkan kembali item ini":"Tandai: tidak ada di kompetisi ini"}">${isNa?"Aktifkan":"Tidak ada"}</button>
+          ${custom?`<button class="mini rm" data-a="rm" title="Hapus item" aria-label="Hapus ${esc(name)}">✕</button>`:""}
+        </span></div>
+      <div class="seg" role="group" aria-label="Status ${esc(name)}">
+        <button type="button" class="p ${!on&&!isNa?"on":""}" data-s="proses" aria-pressed="${!on&&!isNa}" ${lock?"disabled":""}>Proses</button>
+        <button type="button" class="s ${on?"on":""}" data-s="done" aria-pressed="${on}" ${lock?"disabled":""}>Selesai</button>
+      </div>
+      <textarea class="note" rows="1" maxlength="300" placeholder="Keterangan…" aria-label="Keterangan ${esc(name)}" ${isAdmin()?"":"disabled"}></textarea>
+    </div>`;
+    const ta=li.querySelector(".note"); ta.value=state.notes[name]||"";
+    ta.addEventListener("input",()=>{
+      autoSize(ta);
+      if(ta.value.trim()) state.notes[name]=ta.value; else delete state.notes[name];
+      persist();
     });
+    li.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+      if(b.dataset.s==="done") state.checked[name]=true; else delete state.checked[name];
+      persist(); renderAll();
+    }));
     li.querySelector('[data-a="na"]').addEventListener("click",()=>{
       if(isNa) delete state.checked[name]; else state.checked[name]="na";
       persist(); renderAll();
     });
     const rm=li.querySelector('[data-a="rm"]');
     if(rm) rm.addEventListener("click",()=>{
-      state.custom=state.custom.filter(x=>x!==name); delete state.checked[name];
+      state.custom=state.custom.filter(x=>x!==name); delete state.checked[name]; delete state.notes[name];
       persist(); renderAll(); toast("Item dihapus");
     });
     ul.appendChild(li);
   });
   if(!ul.children.length){
-    const msg = q?"Tidak ada item yang cocok.":filter==="done"?"Belum ada item yang selesai.":filter==="na"?"Belum ada item yang ditandai tidak ada.":"Semua item sudah selesai 🎉";
+    const msg = q?"Tidak ada item yang cocok.":filter==="done"?"Belum ada item yang selesai.":filter==="na"?"Belum ada item yang ditandai tidak ada.":"Tidak ada item yang masih diproses 🎉";
     ul.innerHTML=`<li class="empty" style="grid-column:1/-1">${msg}</li>`;
   }
+  ul.querySelectorAll(".note").forEach(autoSize);
 }
 function renderProgress(){
   const s=stats();
@@ -440,12 +455,14 @@ function renderEvents(){
     const ok=items.filter(n=>u.checked[n]===true), na=items.filter(n=>u.checked[n]==="na"), no=items.filter(n=>u.checked[n]!==true&&u.checked[n]!=="na");
     let st="",cls="";
     if(d){ const df=Math.round((d-today)/864e5); if(df>0){st="H-"+df;cls=df<=7?"soon":"fut";}else if(df===0){st="Hari ini";cls="now";}else{st="Sudah terlaksana";cls="past";} }
+    const nl=items.filter(n=>u.notes[n]&&String(u.notes[n]).trim());
+    const nts=nl.length?`<div class="gt">Keterangan · ${nl.length}</div><div class="nts">${nl.map(n=>`<div class="nt"><b>${esc(n)}</b> — ${esc(u.notes[n])}</div>`).join("")}</div>`:"";
     const grp=(t,a,c)=>a.length?`<div class="gt">${t} · ${a.length}</div><div class="tags">${a.map(n=>`<span class="tag ${c}">${esc(n)}</span>`).join("")}</div>`:"";
     out+=`<article class="ev"><div class="date">${d?`<b>${d.getDate()}</b><span>${MON[d.getMonth()].slice(0,3)}</span>`:`<b>–</b><span>tgl</span>`}</div>
       <div><div class="evt"><span class="n">${esc(e.nama||"Tanpa nama")}</span>${st?`<span class="st ${cls}">${st}</span>`:""}</div>
       <div class="bar"><i style="width:${e.percent}%;${e.percent===100?"background:var(--ok)":""}"></i></div>
-      <div class="cnt"><span class="ok">✓ ${ok.length} selesai</span><span class="no">• ${no.length} belum</span>${na.length?`<span class="na">– ${na.length} tidak ada</span>`:""}<span class="upd">Diperbarui ${esc(e.savedAt)}</span></div>
-      <details><summary>Lihat rincian</summary>${grp("Selesai",ok,"ok")}${grp("Belum selesai",no,"no")}${grp("Tidak ada di event ini",na,"na")}</details></div>
+      <div class="cnt"><span class="ok">✓ ${ok.length} selesai</span><span class="no">• ${no.length} proses</span>${na.length?`<span class="na">– ${na.length} tidak ada</span>`:""}<span class="upd">Diperbarui ${esc(e.savedAt)}</span></div>
+      <details><summary>Lihat rincian</summary>${grp("Selesai",ok,"ok")}${grp("Proses",no,"no")}${grp("Tidak ada di event ini",na,"na")}${nts}</details></div>
       <span class="pill ${e.percent===100?"full":""}">${e.percent}%</span></article>`;
   });
   box.innerHTML=out;
@@ -515,7 +532,7 @@ $("save").addEventListener("click",()=>{
 $("reset").addEventListener("click",()=>$("confirm").classList.add("show"));
 $("no").addEventListener("click",()=>$("confirm").classList.remove("show"));
 $("yes").addEventListener("click",()=>{
-  state.checked={}; persist(); $("confirm").classList.remove("show"); renderAll(); toast("Checklist direset");
+  state.checked={}; state.notes={}; persist(); $("confirm").classList.remove("show"); renderAll(); toast("Checklist direset");
 });
 
 $("hist").addEventListener("click",e=>{
@@ -528,7 +545,7 @@ $("hist").addEventListener("click",e=>{
     if(apiReady()) api({action:"delete",id}).catch(()=>toast("Gagal menghapus di Spreadsheet"));
   }else{
     const u=unpack(entry.checked);
-    state.checked=u.checked; state.custom=sortId([...state.custom,...u.custom]);
+    state.checked=u.checked; state.notes=u.notes; state.custom=sortId([...state.custom,...u.custom]);
     state.nama=entry.nama; state.tgl=entry.tgl; state.eid=entry.id;
     $("nama").value=state.nama; $("tgl").value=state.tgl;
     persist(); renderAll(); toast("Riwayat dimuat ke checklist"); setView("prep");
@@ -543,7 +560,7 @@ $("newYes").addEventListener("click",()=>{
   $("confirmNew").classList.remove("show");
   let entry=null;
   if(state.nama.trim()||stats().done>0){ entry=makeEntry(); upsertHistory(entry); }
-  state.nama=""; state.tgl=""; state.checked={}; state.eid=null;
+  state.nama=""; state.tgl=""; state.checked={}; state.notes={}; state.eid=null;
   $("nama").value=""; $("tgl").value="";
   filter="all"; query=""; $("q").value="";
   document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.f==="all"));
