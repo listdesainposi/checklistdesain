@@ -190,17 +190,11 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .dc pre{white-space:pre-wrap;font:inherit;font-size:13.5px;margin:8px 0;overflow-wrap:anywhere}
 .dc .m{font-size:12px;color:var(--mute)}
 .ro .add,.ro .actions,.ro #newComp,.ro .mini,.ro .acts{display:none!important}
-.fup{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:1px dashed var(--pri);border-radius:12px;color:var(--pri);background:var(--pri-soft);font-weight:700;font-size:13px;cursor:pointer}
-.fhint{font-size:12px;color:var(--mute);margin-left:8px}
-.fthumbs,.fgal{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.fth{position:relative;width:84px;height:84px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
-.fth img{width:100%;height:100%;object-fit:cover;display:block}
-.fth button{position:absolute;top:3px;right:3px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:12px;line-height:1}
-.fgal img{width:120px;height:120px;object-fit:cover;border-radius:12px;border:1px solid var(--line);cursor:zoom-in;background:var(--field)}
-.lb{display:none;position:fixed;inset:0;z-index:30;background:rgba(8,10,25,.88);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;cursor:zoom-out}
-.lb.show{display:flex}
-.lb img{max-width:100%;max-height:82vh;border-radius:14px}
-.lb a{color:#fff;font-size:13px;font-weight:600}
+.dlink{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.dlink a,.dlink button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.dlink a.open{background:var(--pri-soft);color:var(--pri);border-color:transparent}
+.dprev{width:100%;height:440px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:4px}
+.dhint{font-size:12px;color:var(--mute);margin:-2px 2px 0}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -241,13 +235,9 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
     <div class="dronly dform">
       <input id="dEvent" list="evList" placeholder="Event / kompetisi" maxlength="80">
       <input id="dJenis" list="jnList" placeholder="Jenis desain, mis. FLYER" maxlength="60">
-      <textarea id="dIsi" rows="5" placeholder="Isi draf desain: teks, keterangan, caption…"></textarea>
+      <input id="dIsi" type="url" inputmode="url" placeholder="Tempel link draf (Google Doc, Drive, Canva, dll.)" maxlength="500">
+      <p class="dhint">Atur akses link ke “Siapa saja yang memiliki link” supaya Desain Grafis bisa membukanya.</p>
       <div class="drow"><button class="btn pri" id="dSave">Simpan draf</button><button class="btn ghost" id="dCancel" hidden>Batal edit</button></div>
-      <div id="dFotoBox" hidden>
-        <label class="fup" for="dFoto">📷 Upload foto<span class="fhint" style="color:inherit;opacity:.8">maks. 4</span></label>
-        <input type="file" id="dFoto" accept="image/*" multiple hidden>
-        <div class="fthumbs" id="dFotoPrev"></div>
-      </div>
       <datalist id="evList"></datalist><datalist id="jnList"></datalist>
     </div>
     <div class="dtools"><input class="search" id="dq" placeholder="Cari draf…" aria-label="Cari draf"><select id="dFilter" aria-label="Filter event"></select></div>
@@ -286,7 +276,6 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div class="lb" id="lb"><img id="lbImg" alt="Foto"><a id="lbLink" target="_blank" rel="noopener">Buka ukuran penuh</a></div>
 <div class="login show" id="login"><div class="lbox">
   <h2>Masuk</h2>
   <p>Pilih peran untuk masuk.</p>
@@ -335,7 +324,14 @@ const pack = (checked,custom,notes=state.notes) => Object.assign({}, checked, {[
 function unpack(c){ c = Object.assign({}, c||{}); const cu = Array.isArray(c[CUSTOM])?c[CUSTOM]:[]; const nt = (c[NOTES]&&typeof c[NOTES]==="object"&&!Array.isArray(c[NOTES]))?Object.assign({},c[NOTES]):{}; delete c[CUSTOM]; delete c[NOTES]; return {checked:c, custom:cu, notes:nt}; }
 const nowStr = () => new Date().toLocaleString("id-ID",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 function fmtDate(iso){ if(!iso) return ""; const d=new Date(iso); return isNaN(d)?"":d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}); }
-function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),2200); }
+function toast(msg,ms=2200){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),ms); }
+function errMsg(e){
+  const m=String((e&&e.message)||e||"");
+  if(m==="unauthorized") return "tidak ada izin, coba masuk ulang";
+  if(/Unexpected token|JSON/i.test(m)) return "Apps Script belum diizinkan / belum di-deploy versi baru";
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return "tidak bisa terhubung ke server";
+  return m||"tidak diketahui";
+}
 function setSync(s,txt){ const e=$("sync"); e.className="sync "+s; e.textContent=txt; }
 
 function load(){
@@ -600,7 +596,7 @@ let drafs=[], editId=null;
 const cmp=(a,b)=>String(a).localeCompare(String(b),"id",{sensitivity:"base"});
 function getDraf(){
   if(role!=="admin"&&role!=="drafter") return Promise.resolve();
-  return api({action:"draf_list"}).then(r=>{ drafs=(r.draf||[]).map(d=>Object.assign(d,{fotos:Array.isArray(d.fotos)?d.fotos:[]})); renderDraf(); }).catch(()=>toast("Gagal memuat draf"));
+  return api({action:"draf_list"}).then(r=>{ drafs=r.draf||[]; renderDraf(); }).catch(e=>{ console.error("draf_list",e); toast("Gagal memuat draf: "+errMsg(e),6000); });
 }
 function renderDraf(){
   if(role!=="admin"&&role!=="drafter") return;
@@ -619,9 +615,8 @@ function renderDraf(){
     out+=`<h3 class="mh">${esc(ev)}</h3>`;
     list.filter(d=>d.event===ev).sort((a,b)=>cmp(a.jenis,b.jenis)).forEach(d=>{
       out+=`<div class="dc" data-id="${d.id}"><div class="top"><span class="jn">${esc(d.jenis)}</span><span class="m">Diperbarui ${esc(d.savedAt||"")}</span></div>
-        <pre>${esc(d.isi)}</pre>
-        ${(d.fotos&&d.fotos.length)?`<div class="fgal">${d.fotos.map((f,i)=>`<img src="${esc(fsrc(f,600))}" data-full="${esc(fsrc(f,2000))}" data-raw="${esc(f)}" alt="Foto ${esc(d.jenis)} ${i+1}" loading="lazy">`).join("")}</div>`:""}
-        <div class="acts"><button data-a="copy">Salin isi</button><span class="dronly" style="display:contents"><button data-a="edit">Edit</button><button class="del" data-a="del">Hapus</button></span></div></div>`;
+        ${docBlock(d)}
+        <div class="acts"><button data-a="copy">Salin link</button><span class="dronly" style="display:contents"><button data-a="edit">Edit</button><button class="del" data-a="del">Hapus</button></span></div></div>`;
     });
   });
   $("dList").innerHTML=out;
@@ -630,68 +625,44 @@ function copyText(t){
   if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t);
   const a=document.createElement("textarea"); a.value=t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); return Promise.resolve();
 }
-const MAXFOTO=4;
-let dFotos=[], dBusy=false;
-const fsrc=(f,w)=>String(f).startsWith("data:")?f:`https://drive.google.com/thumbnail?id=${encodeURIComponent(f)}&sz=w${w}`;
-const isFlyer=()=>$("dJenis").value.toUpperCase().includes("FLYER");
-function syncFotoBox(){
-  $("dFotoBox").hidden=!(isFlyer()||dFotos.length);
-  $("dFotoPrev").innerHTML=dFotos.map((f,i)=>`<div class="fth"><img src="${esc(fsrc(f,300))}" alt="Foto ${i+1}"><button type="button" data-i="${i}" aria-label="Hapus foto ${i+1}">✕</button></div>`).join("");
+const docId=u=>{ const m=/^https:\/\/docs\.google\.com\/document\/(?:u\/\d+\/)?d\/([\w-]+)/.exec(String(u||"").trim()); return m?m[1]:""; };
+const isUrl=u=>/^https?:\/\/[^\s]+$/i.test(String(u||"").trim());
+function docBlock(d){
+  if(!isUrl(d.isi)) return `<pre>${esc(d.isi)}</pre>`; // draf lama berupa teks
+  const doc=!!docId(d.isi);
+  return `<div class="dlink"><a class="open" href="${esc(d.isi.trim())}" target="_blank" rel="noopener noreferrer">${doc?"📄 Buka Google Doc":"🔗 Buka link"}</a>${doc?'<button type="button" data-a="prev">Pratinjau</button>':""}</div><div class="pv"></div>`;
 }
-function shrink(file){
-  return new Promise((res,rej)=>{
-    const url=URL.createObjectURL(file), im=new Image();
-    im.onload=()=>{
-      const k=Math.min(1,1400/Math.max(im.naturalWidth,im.naturalHeight)), w=Math.round(im.naturalWidth*k), h=Math.round(im.naturalHeight*k);
-      const c=document.createElement("canvas"); c.width=w; c.height=h;
-      const x=c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,w,h); x.drawImage(im,0,0,w,h);
-      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg",.82));
-    };
-    im.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error("bad")); };
-    im.src=url;
-  });
-}
-$("dJenis").addEventListener("input",syncFotoBox);
-$("dFoto").addEventListener("change",async e=>{
-  const files=[...e.target.files].filter(f=>f.type.startsWith("image/")); e.target.value="";
-  const room=MAXFOTO-dFotos.length;
-  if(files.length>room) toast("Maksimal "+MAXFOTO+" foto");
-  dBusy=true;
-  for(const f of files.slice(0,Math.max(room,0))){ try{ dFotos.push(await shrink(f)); }catch(_){ toast("Foto tidak bisa dibaca"); } }
-  dBusy=false; syncFotoBox();
-});
-$("dFotoPrev").addEventListener("click",e=>{ const b=e.target.closest("button[data-i]"); if(!b) return; dFotos.splice(+b.dataset.i,1); syncFotoBox(); });
-function openLb(src,raw){ $("lbImg").src=src; const a=$("lbLink"); if(raw&&!String(raw).startsWith("data:")){ a.href=src; a.hidden=false; } else a.hidden=true; $("lb").classList.add("show"); }
-$("lb").addEventListener("click",e=>{ if(e.target.id!=="lbLink") $("lb").classList.remove("show"); });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") $("lb").classList.remove("show"); });
-$("dList").addEventListener("click",e=>{ const im=e.target.closest("img[data-full]"); if(im) openLb(im.dataset.full,im.dataset.raw); });
-function resetDForm(){ editId=null; dFotos=[]; $("dIsi").value=""; $("dJenis").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; syncFotoBox(); }
+function resetDForm(){ editId=null; $("dIsi").value=""; $("dJenis").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; }
 $("dq").addEventListener("input",renderDraf);
 $("dFilter").addEventListener("change",renderDraf);
 $("dCancel").addEventListener("click",resetDForm);
 $("dSave").addEventListener("click",()=>{
   const ev=$("dEvent").value.trim(), jn=$("dJenis").value.trim().toUpperCase(), isi=$("dIsi").value.trim();
-  if(!ev||!jn||!isi){ toast("Event, jenis desain, dan isi draf wajib diisi"); return; }
-  if(dBusy){ toast("Foto masih diproses, tunggu sebentar"); return; }
-  const item={id:editId||Date.now(),event:ev,jenis:jn,isi,fotos:dFotos.slice(),savedAt:nowStr()};
+  if(!ev||!jn||!isi){ toast("Event, jenis desain, dan link draf wajib diisi"); return; }
+  if(!isUrl(isi)){ toast("Isi draf harus berupa link yang diawali https://",4000); return; }
+  const item={id:editId||Date.now(),event:ev,jenis:jn,isi,savedAt:nowStr()};
   drafs=drafs.filter(d=>d.id!==item.id); drafs.push(item); resetDForm(); renderDraf();
-  if(item.fotos.some(f=>String(f).startsWith("data:"))) toast("Mengunggah foto…");
-  api({action:"draf_save",item}).then(r=>{
-    if(r.item&&Array.isArray(r.item.fotos)){ item.fotos=r.item.fotos; renderDraf(); }
+  api({action:"draf_save",item}).then(()=>{
     toast("Draf tersimpan ✓");
-  }).catch(()=>toast("Gagal menyimpan draf"));
+  }).catch(e=>{ console.error("draf_save",e); toast("Gagal menyimpan draf: "+errMsg(e),6000); });
 });
 $("dList").addEventListener("click",e=>{
   const b=e.target.closest("button[data-a]"); if(!b) return;
   const d=drafs.find(x=>x.id===+b.closest(".dc").dataset.id); if(!d) return;
-  if(b.dataset.a==="copy"){ copyText(d.isi).then(()=>toast("Isi draf disalin")); }
+  if(b.dataset.a==="prev"){
+    const box=b.closest(".dc").querySelector(".pv"), id=docId(d.isi);
+    if(box.firstChild){ box.innerHTML=""; b.textContent="Pratinjau"; }
+    else if(id){ box.innerHTML=`<iframe class="dprev" src="https://docs.google.com/document/d/${id}/preview" loading="lazy"></iframe>`; b.textContent="Tutup pratinjau"; }
+    return;
+  }
+  if(b.dataset.a==="copy"){ copyText(d.isi).then(()=>toast("Link draf disalin")); }
   else if(role!=="drafter") return;
   else if(b.dataset.a==="edit"){
-    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.isi; dFotos=[...(d.fotos||[])]; syncFotoBox();
+    editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; $("dIsi").value=d.isi;
     $("dCancel").hidden=false; $("dSave").textContent="Perbarui draf"; window.scrollTo({top:0,behavior:"smooth"}); $("dIsi").focus();
   }else{
     drafs=drafs.filter(x=>x.id!==d.id); renderDraf();
-    api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(()=>toast("Gagal menghapus draf"));
+    api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(e=>{ console.error("draf_delete",e); toast("Gagal menghapus draf: "+errMsg(e),6000); });
   }
 });
 function applyRole(){
