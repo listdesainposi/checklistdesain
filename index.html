@@ -227,6 +227,29 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .rel b{color:var(--ink)}
 .rel button{border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
 .rel button:hover{border-color:var(--pri);color:var(--pri)}
+.dst.p-draft{background:var(--field);color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}
+.dst.p-approved{background:var(--na-soft);color:var(--na)}
+.dst.p-rejected{background:var(--bad-soft);color:var(--bad)}
+.dst.p-done{background:var(--ok-soft);color:var(--ok)}
+.dst.p-posted{background:var(--pri-soft);color:var(--pri)}
+.seg.wrap{flex-wrap:wrap}
+.seg button.on.g{background:var(--field);color:var(--ink);box-shadow:inset 0 0 0 1px var(--mute)}
+.drow4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media(max-width:560px){.drow4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mc{border:1px solid var(--line);background:var(--card);color:var(--mute);padding:6px 12px;border-radius:99px;font-size:12.5px;font-weight:600}
+.mc.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.tblw{overflow:auto;border:1px solid var(--line);border-radius:14px;max-height:68vh}
+.tbl{border-collapse:separate;border-spacing:0;min-width:1500px;width:100%;font-size:12.5px}
+.tbl th{position:sticky;top:0;z-index:2;background:linear-gradient(135deg,#1b1450,#4b34e0);color:#fff;text-align:left;font-weight:700;padding:10px 12px;white-space:nowrap}
+.tbl td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top;background:var(--card)}
+.tbl tbody tr:nth-child(even) td{background:var(--field)}
+.tbl td.c1{font-weight:700;min-width:180px;position:sticky;left:0;z-index:1}
+.tbl th:first-child{left:0;z-index:3}
+.tbl td.cc{min-width:220px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tbl td.ta{white-space:nowrap}
+.tbl a{color:var(--pri);font-weight:700;margin-right:6px;text-decoration:none}
+.tbl button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;margin-right:4px}
+.tbl button.del{color:var(--bad)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -281,19 +304,31 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
   <section id="planView"><div class="card">
     <h2><span>Content Plan Digital Marketing</span><span class="pill" id="pcount">0</span></h2>
     <div class="edonly dform">
-      <input id="pJudul" type="text" placeholder="Topik / judul konten" maxlength="120">
+      <input id="pJudul" type="text" placeholder="Judul / topik konten" maxlength="150">
       <div class="drow3">
-        <div class="dfield"><label for="pTgl">Tanggal tayang</label><input id="pTgl" type="date"></div>
-        <div class="dfield"><label for="pPlat">Platform</label><select id="pPlat"><option value="">Pilih platform</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Facebook</option><option>WhatsApp</option><option>Website</option><option>Lainnya</option></select></div>
-        <div class="dfield"><label for="pPic">PIC</label><select id="pPic"><option value="">Pilih PIC</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select></div>
+        <div class="dfield"><label for="pStatus">Status</label><select id="pStatus"></select></div>
+        <div class="dfield"><label for="pType">Type</label><select id="pType"></select></div>
+        <div class="dfield"><label for="pBrand">Brand</label><select id="pBrand"></select></div>
       </div>
-      <input id="pEvent" list="evList" placeholder="Event terkait (opsional)" maxlength="80">
-      <textarea id="pCap" rows="3" placeholder="Caption / catatan (opsional)" maxlength="1000"></textarea>
+      <div class="drow4">
+        <div class="dfield"><label for="pPlat">Platform</label><select id="pPlat"></select></div>
+        <div class="dfield"><label for="pPil">Content Pillar</label><select id="pPil"></select></div>
+        <div class="dfield"><label for="pCw">PIC Copywriting</label><select id="pCw"></select></div>
+        <div class="dfield"><label for="pDs">PIC Desain</label><select id="pDs"></select></div>
+      </div>
+      <div class="drow4">
+        <div class="dfield"><label for="pDraft">Draft</label><input id="pDraft" type="date"></div>
+        <div class="dfield"><label for="pDeadline">Deadline</label><input id="pDeadline" type="date"></div>
+        <div class="dfield"><label for="pDone">DONE</label><input id="pDone" type="date"></div>
+        <div class="dfield"><label for="pUpload">UPLOAD</label><input id="pUpload" type="date"></div>
+      </div>
+      <textarea id="pConcept" rows="3" placeholder="Concept (opsional)" maxlength="1500"></textarea>
       <textarea id="pLink" rows="2" placeholder="Link (opsional, Drive / Canva / dll.). Satu link per baris" maxlength="1500"></textarea>
       <div class="dfield"><label for="pDes">Hubungkan ke desain di List Desain (opsional)</label><select id="pDes"><option value="">Tidak dihubungkan ke desain</option></select></div>
       <div class="drow"><button class="btn pri" id="pSave">Simpan konten</button><button class="btn ghost" id="pCancel" hidden>Batal edit</button></div>
     </div>
-    <div class="dtools t3"><input class="search" id="pq" placeholder="Cari konten…" aria-label="Cari konten"><select id="pFPic" aria-label="Filter PIC"><option value="">Semua PIC</option><option value="Aji">Aji</option><option value="Fahrizal">Fahrizal</option></select><select id="pFSt" aria-label="Filter status"><option value="">Semua status</option><option value="rencana">Rencana</option><option value="proses">Proses</option><option value="tayang">Tayang</option><option value="batal">Cancel</option></select></div>
+    <div class="dtools t3"><input class="search" id="pq" placeholder="Cari konten…" aria-label="Cari konten"><select id="pFSt" aria-label="Filter status"></select><select id="pFBrand" aria-label="Filter brand"></select><select id="pFCw" aria-label="Filter PIC Copywriting"></select><select id="pFPic" aria-label="Filter PIC Desain"></select></div>
+    <div class="tools" id="pMode"><button type="button" class="mc on" data-m="card">Tampilan kartu</button><button type="button" class="mc" data-m="tbl">Tampilan tabel</button></div>
     <div id="pSum" class="psum"></div>
     <div id="pList"></div>
   </div></section>
@@ -663,7 +698,7 @@ const fmtD=s=>{ const d=dayOf(s); return d?d.toLocaleDateString("id-ID",{day:"nu
 // simpan yang terbaru (id terbesar) untuk tiap kunci
 function uniqNewest(list,keyFn){ const m=new Map(); list.forEach(x=>{ const k=keyFn(x), o=m.get(k); if(!o||Number(x.id)>=Number(o.id)) m.set(k,x); }); return [...m.values()]; }
 const drafKey=d=>nkey(d.event)+"|"+nkey(d.jenis);
-const planKey=p=>nkey(String(p.tgl||"").slice(0,10))+"|"+nkey(p.platform)+"|"+nkey(p.judul);
+const planKey=p=>nkey(p.judul)+"|"+nkey(p.brand)+"|"+nkey(p.platform)+"|"+nkey(p.type);
 function uniqNames(a){ const m=new Map(); a.forEach(n=>{ const k=nkey(n); if(k&&!m.has(k)) m.set(k,n); }); return [...m.values()]; }
 function dedupeHist(h){ const seen=new Set(); return (h||[]).filter(e=>{ const k=nkey(e.nama)||("#"+e.id); if(seen.has(k)) return false; seen.add(k); return true; }); }
 function canonEvent(ev){ const k=nkey(ev); const f=[...state.history.map(e=>e.nama),...drafs.map(d=>d.event),...plans.map(p=>p.event)].find(n=>nkey(n)===k); return f||String(ev).trim().replace(/\s+/g," "); }
@@ -795,28 +830,62 @@ $("dList").addEventListener("click",e=>{
   }
 });
 
-/* ---------- Content Plan Digital Marketing ---------- */
+/* ---------- Content Plan Digital Marketing (mengikuti tabel di Google Sheets) ---------- */
+// Pilihan bawaan. Kalau dropdown di spreadsheet bisa dibaca, daftar ini diganti otomatis dengan isi dropdown di sana.
+const OPT={
+  status:["Draft","Approved","Rejected","Done","Posted/ Scheduled"],
+  type:["Feed","Reel"],
+  brand:["POSI","POSI Store","Smart Champion"],
+  platform:["Instagram","TikTok","YouTube","Facebook","Lainnya"],
+  pillar:["Educational","Entertainment","Promotional","Conversational","Momentum"],
+  picCw:["Liza","Nayla","Habib"],
+  picDs:["Aji","Tri","Habib","Liza","Nay","Fahrizal","Adit"]
+};
+const DONE_KEYS=["done","posted"];
+const skey=st=>{ const t=nkey(st); return t.startsWith("approv")?"approved":t.startsWith("reject")?"rejected":t==="done"?"done":t.startsWith("post")?"posted":"draft"; };
+const SEGCLS={draft:"g",approved:"p",rejected:"c",done:"s",posted:"n"};
+let planMode="card";
 function normPlan(r){
-  return {id:r.id,tgl:String(r.tgl||"").slice(0,10),platform:String(r.platform||""),judul:String(r.judul||""),caption:String(r.caption||""),link:String(r.link||""),
-    event:String(r.event||""),pic:PICS.includes(r.pic)?r.pic:"",status:CPST[r.status]?r.status:"rencana",desain:Number(r.desain)||0,savedAt:r.savedAt||""};
+  const o={id:r.id};
+  ["judul","status","type","brand","platform","pillar","picCw","picDs","concept","link"].forEach(k=>{ o[k]=String(r[k]==null?"":r[k]); });
+  ["draft","deadline","done","upload"].forEach(k=>{ o[k]=String(r[k]||"").slice(0,10); });
+  o.desain=Number(r.desain)||0;
+  return o;
+}
+function fillSel(id,list,ph,keep){
+  const el=$(id), cur=el.value;
+  el.innerHTML=`<option value="">${esc(ph)}</option>`+list.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  if(cur&&keep&&!list.includes(cur)) el.insertAdjacentHTML("beforeend",`<option value="${esc(cur)}">${esc(cur)}</option>`);
+  el.value=cur; if(el.value!==cur) el.value="";
+}
+function setSel(id,val){ const el=$(id); val=val||""; if(val&&![...el.options].some(o=>o.value===val)) el.insertAdjacentHTML("beforeend",`<option value="${esc(val)}">${esc(val)}</option>`); el.value=val; }
+function fillPlanSelects(){
+  fillSel("pStatus",OPT.status,"Pilih status",true); fillSel("pType",OPT.type,"Pilih type",true); fillSel("pBrand",OPT.brand,"Pilih brand",true);
+  fillSel("pPlat",OPT.platform,"Pilih platform",true); fillSel("pPil",OPT.pillar,"Pilih content pillar",true);
+  fillSel("pCw",OPT.picCw,"Pilih PIC Copywriting",true); fillSel("pDs",OPT.picDs,"Pilih PIC Desain",true);
+  fillSel("pFSt",OPT.status,"Semua status",false); fillSel("pFBrand",OPT.brand,"Semua brand",false);
+  fillSel("pFCw",OPT.picCw,"Semua PIC Copywriting",false); fillSel("pFPic",OPT.picDs,"Semua PIC Desain",false);
+}
+function applyOpts(o){
+  if(!o) return;
+  Object.keys(OPT).forEach(k=>{ if(Array.isArray(o[k])&&o[k].length) OPT[k]=o[k].map(String); });
+  fillPlanSelects();
 }
 function getPlan(){
   if(!role) return Promise.resolve();
-  return api({action:"cp_list"}).then(r=>{ plans=uniqNewest((r.plan||[]).map(normPlan),planKey); renderDP(); }).catch(e=>{ console.error("cp_list",e); toast("Gagal memuat Content Plan: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":e.message==="unauthorized"?"akses belum diizinkan di Apps Script":errMsg(e)),6000); });
+  return api({action:"cp_list"}).then(r=>{ applyOpts(r.opts); plans=uniqNewest((r.plan||[]).map(normPlan),planKey); renderDP(); }).catch(e=>{ console.error("cp_list",e); toast("Gagal memuat Content Plan: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":e.message==="unauthorized"?"akses belum diizinkan di Apps Script":errMsg(e)),6000); });
 }
-const planStatusBar=p=>`<div class="stbar"><span>Ubah status:</span><div class="seg" role="group" aria-label="Status ${esc(p.judul)}">${Object.keys(CPST).map(k=>`<button type="button" class="${{rencana:"n",proses:"p",tayang:"s",batal:"c"}[k]} ${p.status===k?"on":""}" data-a="pst" data-v="${k}" aria-pressed="${p.status===k}">${CPST[k]}</button>`).join("")}</div></div>`;
+const planStatusBar=p=>`<div class="stbar"><span>Ubah status:</span><div class="seg wrap" role="group" aria-label="Status ${esc(p.judul)}">${OPT.status.map(k=>`<button type="button" class="${SEGCLS[skey(k)]} ${p.status===k?"on":""}" data-a="pst" data-v="${esc(k)}" aria-pressed="${p.status===k}">${esc(k)}</button>`).join("")}</div></div>`;
 function renderDP(){ if(view==="draf") renderDraf(); if(view==="plan") renderPlan(); }
 function fillDesList(want){
-  const sel=$("pDes"), cur=want!==undefined?String(want):sel.value, ev=nkey($("pEvent").value);
-  let src=drafs.filter(d=>d.status!=="batal"||String(d.id)===cur);
-  const m=ev?src.filter(d=>nkey(d.event)===ev||String(d.id)===cur):[];
-  if(m.length) src=m;
-  src=[...src].sort((a,b)=>cmp(a.event,b.event)||cmp(a.jenis,b.jenis));
+  const sel=$("pDes"), cur=want!==undefined?String(want):sel.value;
+  const src=drafs.filter(d=>d.status!=="batal"||String(d.id)===cur).sort((a,b)=>cmp(a.event,b.event)||cmp(a.jenis,b.jenis));
   sel.innerHTML='<option value="">Tidak dihubungkan ke desain</option>'+src.map(d=>`<option value="${d.id}">${esc(d.event)} — ${esc(d.jenis)} (${STATUS[d.status]})</option>`).join("");
   sel.value=[...sel.options].some(o=>o.value===cur)?cur:"";
 }
+const linkList=p=>String(p.link||"").split(/\r?\n/).map(x=>x.trim()).filter(x=>isUrl(x));
 function linksHtml(p){
-  const ls=String(p.link||"").split(/\r?\n/).map(x=>x.trim()).filter(x=>isUrl(x));
+  const ls=linkList(p);
   if(!ls.length) return "";
   return `<div class="dlink">${ls.map((u,i)=>`<a class="open" href="${esc(u)}" target="_blank" rel="noopener noreferrer">🔗 ${ls.length>1?"Buka link "+(i+1):"Buka link"}</a>`).join("")}</div>`;
 }
@@ -827,79 +896,119 @@ function desRel(p){
 }
 function relHtml(d){
   const r=plans.filter(p=>p.desain===d.id);
-  return r.length?`<div class="rel">📣 Content Plan:${r.map(p=>`<button type="button" data-a="gopl" data-pid="${p.id}">${esc(p.judul)} · ${esc(fmtD(p.tgl)||"-")} <span class="dst ${p.status}">${CPST[p.status]}</span></button>`).join("")}</div>`:"";
+  return r.length?`<div class="rel">📣 Content Plan:${r.map(p=>`<button type="button" data-a="gopl" data-pid="${p.id}">${esc(p.judul)} · ${esc(fmtD(p.upload||p.deadline||p.draft)||"-")} <span class="dst p-${skey(p.status)}">${esc(p.status||"-")}</span></button>`).join("")}</div>`:"";
 }
 function goDesain(d){
   setView("draf");
   const o=[...$("dFilter").options].find(x=>nkey(x.value)===nkey(d.event));
   $("dFilter").value=o?o.value:""; $("dq").value=d.jenis; $("dStat").value=""; $("dPic").value=""; renderDraf();
 }
-function goPlan(p){ setView("plan"); $("pq").value=p.judul; $("pFPic").value=""; $("pFSt").value=""; renderPlan(); }
+function goPlan(p){ setView("plan"); $("pq").value=p.judul; ["pFSt","pFBrand","pFCw","pFPic"].forEach(i=>{ $(i).value=""; }); renderPlan(); }
+function planSumHtml(list,sel){
+  const names=sel?[sel]:OPT.picDs.filter(n=>list.some(p=>p.picDs===n));
+  let out=names.map(n=>{
+    const mine=list.filter(p=>p.picDs===n), act=mine.filter(p=>skey(p.status)!=="rejected"), done=act.filter(p=>DONE_KEYS.includes(skey(p.status))).length, cx=mine.length-act.length;
+    const pct=act.length?Math.round(done/act.length*100):0;
+    return `<div class="ps"><div class="pst"><b>${esc(n)}</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%;${pct===100?"background:var(--ok)":""}"></i></div><div class="psm">PIC Desain · ${done} selesai dari ${act.length} aktif${cx?` · ${cx} rejected`:""}</div></div>`;
+  }).join("");
+  const nopic=list.filter(p=>!p.picDs).length;
+  if(!sel&&nopic) out+=`<div class="psm" style="grid-column:1/-1">${nopic} konten belum punya PIC Desain (tidak masuk persentase)</div>`;
+  return out;
+}
+const planActive=p=>!["done","posted","rejected"].includes(skey(p.status));
+function planCard(p,ed){
+  const k=skey(p.status), dt=(l,v,chip)=>v?`<span>${l}: <b>${esc(fmtD(v))}</b>${chip||""}</span>`:"";
+  return `<div class="dc ${k==="rejected"?"batal":""}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span class="dst p-${k}">${esc(p.status||"-")}</span></div>
+    <div class="dmeta">${p.type?`<span>🎬 <b>${esc(p.type)}</b></span>`:""}${p.brand?`<span>🏷️ <b>${esc(p.brand)}</b></span>`:""}${p.platform?`<span>📱 <b>${esc(p.platform)}</b></span>`:""}${p.pillar?`<span>🧭 <b>${esc(p.pillar)}</b></span>`:""}</div>
+    <div class="dmeta"><span>✍️ Copywriting: <b>${esc(p.picCw||"-")}</b></span><span>🎨 PIC Desain: <b>${esc(p.picDs||"-")}</b></span></div>
+    <div class="dmeta">${dt("📝 Draft",p.draft)}${dt("⏰ Deadline",p.deadline,planActive(p)?" "+dueChip(p.deadline,true):"")}${dt("✅ Done",p.done)}${dt("🚀 Upload",p.upload)}${!(p.draft||p.deadline||p.done||p.upload)?"<span>Tanggal belum diisi</span>":""}</div>
+    ${p.concept?`<pre><b>Concept:</b> ${esc(p.concept)}</pre>`:""}
+    ${linksHtml(p)}
+    ${desRel(p)}
+    ${ed?planStatusBar(p):""}
+    <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div>`;
+}
+function planTable(list,ed){
+  const H=["Judul","Status","Type","Brand","Platform","Content Pillar","PIC Copywriting","PIC Desain","Draft","Deadline","DONE","UPLOAD","Concept","Link","Desain"];
+  const rows=list.map(p=>{
+    const ds=p.desain?drafs.find(x=>x.id===p.desain):null, ls=linkList(p);
+    return `<tr data-id="${p.id}"><td class="c1">${esc(p.judul)}</td><td><span class="dst p-${skey(p.status)}">${esc(p.status||"-")}</span></td><td>${esc(p.type)}</td><td>${esc(p.brand)}</td><td>${esc(p.platform)}</td><td>${esc(p.pillar)}</td><td>${esc(p.picCw)}</td><td>${esc(p.picDs)}</td><td>${esc(fmtD(p.draft))}</td><td>${esc(fmtD(p.deadline))}</td><td>${esc(fmtD(p.done))}</td><td>${esc(fmtD(p.upload))}</td><td class="cc">${esc(p.concept)}</td><td>${ls.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Link${ls.length>1?" "+(i+1):""}</a>`).join("")}</td><td>${ds?`<button type="button" class="lk" data-a="godes">${esc(ds.jenis)} · ${STATUS[ds.status]}</button>`:""}</td>${ed?`<td class="ta"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></td>`:""}</tr>`;
+  }).join("");
+  return `<div class="tblw"><table class="tbl"><thead><tr>${H.map(h=>`<th>${h}</th>`).join("")}${ed?"<th></th>":""}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
 function renderPlan(){
   if(!role) return;
   fillEvList(); fillDesList();
   const ed=role==="drafter";
-  const pf=$("pFPic").value, sf=$("pFSt").value, q=$("pq").value.trim().toLowerCase();
-  $("pSum").innerHTML=plans.length?picSumHtml(plans,pf,"tayang"):"";
-  const list=plans.filter(p=>(!pf||p.pic===pf)&&(!sf||p.status===sf)&&(!q||(p.judul+" "+p.caption+" "+p.platform+" "+p.event+" "+p.pic).toLowerCase().includes(q)))
-    .sort((a,b)=>String(a.tgl).localeCompare(String(b.tgl))||cmp(a.judul,b.judul));
+  const fSt=$("pFSt").value, fBr=$("pFBrand").value, fCw=$("pFCw").value, fDs=$("pFPic").value, q=$("pq").value.trim().toLowerCase();
+  const base=plans.filter(p=>(!fBr||p.brand===fBr)&&(!fCw||p.picCw===fCw));
+  $("pSum").innerHTML=base.length?planSumHtml(base,fDs):"";
+  const dk=p=>String(p.upload||p.deadline||p.draft||"9999");
+  const list=base.filter(p=>(!fDs||p.picDs===fDs)&&(!fSt||p.status===fSt)&&(!q||[p.judul,p.status,p.type,p.brand,p.platform,p.pillar,p.picCw,p.picDs,p.concept,p.link].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=>dk(a).localeCompare(dk(b))||cmp(a.judul,b.judul));
   $("pcount").textContent=list.length;
   if(!list.length){ $("pList").innerHTML=`<div class="empty"><b>🗓️</b>${plans.length?"Tidak ada konten yang cocok.":ed?"Belum ada content plan. Isi form di atas untuk menambah.":"Belum ada content plan."}</div>`; return; }
+  if(planMode==="tbl"){ $("pList").innerHTML=planTable(list,ed); return; }
   let cur="", out="";
   list.forEach(p=>{
-    const d=dayOf(p.tgl), mk=d?MON[d.getMonth()]+" "+d.getFullYear():"Tanpa tanggal";
+    const d=dayOf(p.upload||p.deadline||p.draft), mk=d?MON[d.getMonth()]+" "+d.getFullYear():"Tanpa tanggal";
     if(mk!==cur){ cur=mk; out+=`<h3 class="mh">${esc(mk)}</h3>`; }
-    out+=`<div class="dc ${p.status}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span class="dst ${p.status}">${CPST[p.status]}</span></div>
-      <div class="dmeta"><span>📅 Tayang: <b>${esc(fmtD(p.tgl)||"-")}</b> ${dueChip(p.tgl,p.status==="rencana"||p.status==="proses")}</span><span>📱 <b>${esc(p.platform)}</b></span><span>👤 PIC: <b>${esc(p.pic||"Belum ada PIC")}</b></span>${p.event?`<span>🏷️ ${esc(p.event)}</span>`:""}<span>Diperbarui ${esc(p.savedAt||"")}</span></div>
-      ${p.caption?`<pre>${esc(p.caption)}</pre>`:""}
-      ${linksHtml(p)}
-      ${desRel(p)}
-      ${ed?planStatusBar(p):""}
-      <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div>`;
+    out+=planCard(p,ed);
   });
   $("pList").innerHTML=out;
 }
-function resetPForm(){ planEditId=null; $("pJudul").value=""; $("pTgl").value=""; $("pCap").value=""; $("pLink").value=""; $("pDes").value=""; $("pCancel").hidden=true; $("pSave").textContent="Simpan konten"; }
+function resetPForm(){
+  planEditId=null;
+  ["pJudul","pConcept","pLink","pDraft","pDeadline","pDone","pUpload"].forEach(i=>{ $(i).value=""; });
+  ["pStatus","pType","pBrand","pPlat","pPil","pCw","pDs","pDes"].forEach(i=>{ $(i).value=""; });
+  $("pCancel").hidden=true; $("pSave").textContent="Simpan konten";
+}
 $("pq").addEventListener("input",renderPlan);
-$("pEvent").addEventListener("input",()=>fillDesList());
-$("pFPic").addEventListener("change",renderPlan);
-$("pFSt").addEventListener("change",renderPlan);
+["pFSt","pFBrand","pFCw","pFPic"].forEach(i=>$(i).addEventListener("change",renderPlan));
+$("pMode").addEventListener("click",e=>{
+  const b=e.target.closest("[data-m]"); if(!b) return;
+  planMode=b.dataset.m; document.querySelectorAll("#pMode .mc").forEach(c=>c.classList.toggle("on",c===b)); renderPlan();
+});
 $("pCancel").addEventListener("click",resetPForm);
 $("pSave").addEventListener("click",()=>{
-  const judul=$("pJudul").value.trim().replace(/\s+/g," "), tgl=$("pTgl").value, platform=$("pPlat").value, pic=$("pPic").value, ev0=$("pEvent").value.trim(), caption=$("pCap").value.trim(), link0=$("pLink").value;
-  if(!judul||!tgl||!platform||!pic){ toast("Judul, tanggal tayang, platform, dan PIC wajib diisi"); return; }
-  const links=[...new Map(link0.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>[x.toLowerCase(),x])).values()];
+  const judul=$("pJudul").value.trim().replace(/\s+/g," "), status=$("pStatus").value, type=$("pType").value, brand=$("pBrand").value;
+  if(!judul||!status||!type||!brand){ toast("Judul, status, type, dan brand wajib diisi"); return; }
+  const links=[...new Map($("pLink").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>[x.toLowerCase(),x])).values()];
   if(links.some(x=>!isUrl(x))){ toast("Setiap link harus diawali https:// (satu link per baris)",4000); return; }
-  const link=links.join("\n"), desain=$("pDes").value?Number($("pDes").value):0;
   const old=plans.find(x=>x.id===planEditId);
-  const item={id:planEditId||Date.now(),tgl,platform,judul,caption,link,desain,event:ev0?canonEvent(ev0):"",pic,status:old?old.status:"rencana",savedAt:nowStr()};
-  if(plans.some(x=>x.id!==item.id&&planKey(x)===planKey(item))){ toast("Konten itu sudah ada (judul, tanggal, dan platform sama), tidak boleh double. Gunakan Edit.",5000); return; }
+  const item={id:planEditId||Date.now(),judul,status,type,brand,platform:$("pPlat").value,pillar:$("pPil").value,picCw:$("pCw").value,picDs:$("pDs").value,
+    draft:$("pDraft").value,deadline:$("pDeadline").value,done:$("pDone").value,upload:$("pUpload").value,concept:$("pConcept").value.trim(),
+    link:links.join("\n"),desain:$("pDes").value?Number($("pDes").value):0};
+  if(plans.some(x=>x.id!==item.id&&planKey(x)===planKey(item))){ toast("Konten itu sudah ada (judul, brand, platform, dan type sama), tidak boleh double. Gunakan Edit.",5000); return; }
   plans=plans.filter(x=>x.id!==item.id); plans.push(item); resetPForm(); renderPlan();
   api({action:"cp_save",item}).then(()=>toast("Konten tersimpan ✓")).catch(e=>{ console.error("cp_save",e); toast("Gagal menyimpan konten: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000); getPlan(); });
 });
 function setPlanStatus(p,s){
   if(p.status===s) return;
-  const old={status:p.status,savedAt:p.savedAt};
-  p.status=s; p.savedAt=nowStr(); renderPlan();
-  api({action:"cp_save",item:p}).then(()=>toast("Status diubah: "+CPST[s]+" ✓")).catch(e=>{
-    console.error("cp_save status",e); p.status=old.status; p.savedAt=old.savedAt; renderPlan(); toast("Gagal mengubah status: "+errMsg(e),6000);
+  const old=p.status;
+  p.status=s; renderPlan();
+  api({action:"cp_save",item:p}).then(()=>toast("Status diubah: "+s+" ✓")).catch(e=>{
+    console.error("cp_save status",e); p.status=old; renderPlan(); toast("Gagal mengubah status: "+errMsg(e),6000);
   });
 }
 $("pList").addEventListener("click",e=>{
   const b=e.target.closest("button[data-a]"); if(!b) return;
-  const p=plans.find(x=>x.id===+b.closest(".dc").dataset.id); if(!p) return;
+  const p=plans.find(x=>x.id===+b.closest("[data-id]").dataset.id); if(!p) return;
   const a=b.dataset.a;
   if(a==="godes"){ const ds=drafs.find(x=>x.id===p.desain); if(ds) goDesain(ds); return; }
   if(role!=="drafter") return;
   if(a==="pst") setPlanStatus(p,b.dataset.v);
   else if(a==="pedit"){
-    planEditId=p.id; $("pJudul").value=p.judul; $("pTgl").value=p.tgl; $("pPlat").value=p.platform; $("pPic").value=p.pic||""; $("pEvent").value=p.event; $("pCap").value=p.caption; $("pLink").value=p.link; fillDesList(p.desain||"");
+    planEditId=p.id; $("pJudul").value=p.judul; $("pConcept").value=p.concept; $("pLink").value=p.link;
+    setSel("pStatus",p.status); setSel("pType",p.type); setSel("pBrand",p.brand); setSel("pPlat",p.platform); setSel("pPil",p.pillar); setSel("pCw",p.picCw); setSel("pDs",p.picDs);
+    $("pDraft").value=p.draft; $("pDeadline").value=p.deadline; $("pDone").value=p.done; $("pUpload").value=p.upload; fillDesList(p.desain||"");
     $("pCancel").hidden=false; $("pSave").textContent="Perbarui konten"; window.scrollTo({top:0,behavior:"smooth"}); $("pJudul").focus();
   }else if(a==="pdel"){
     plans=plans.filter(x=>x.id!==p.id); renderPlan();
     api({action:"cp_delete",id:p.id}).then(()=>toast("Konten dihapus")).catch(e=>{ console.error("cp_delete",e); toast("Gagal menghapus konten: "+errMsg(e),6000); getPlan(); });
   }
 });
+fillPlanSelects();
 function applyRole(){
   const bc=document.body.classList;
   bc.toggle("ro",role==="viewer"); bc.toggle("r-admin",role==="admin"); bc.toggle("rd",role==="drafter");
