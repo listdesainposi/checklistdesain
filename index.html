@@ -284,6 +284,12 @@ body{padding:16px 16px 70px}
   .nav{position:fixed;left:0;top:0;bottom:0;width:224px;flex-direction:column;flex-wrap:nowrap;margin:0;padding:16px 12px;z-index:10}
 }
 @media(max-width:899px){.nav{position:sticky;top:0;z-index:10;margin:-16px -16px 14px;padding:10px 12px;overflow-x:auto;flex-wrap:nowrap;border-radius:0 0 14px 14px;border-right:0;box-shadow:0 4px 14px -8px rgba(15,23,42,.25)}}
+.dc.pcx{cursor:pointer}
+.dc.pcx .pdet{display:none;margin-top:8px;cursor:auto}
+.dc.pcx.open .pdet{display:block}
+.pchev{display:inline-block;margin-left:8px;color:var(--mute);font-size:13px;transition:transform .15s}
+.dc.pcx.open .pchev{transform:rotate(180deg)}
+.dc.pcx .pdet{border-top:1px dashed var(--line);padding-top:8px}
 .brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px}
 .brand img{display:block;width:100%;max-width:190px;border-radius:0;padding:0}
 .brand span{color:#475569;font-weight:800;font-size:11.5px;letter-spacing:.2em}
@@ -734,6 +740,7 @@ const STATUS={proses:"Proses",siap:"Siap",batal:"Cancel"};
 const CPST={rencana:"Rencana",proses:"Proses",tayang:"Tayang",batal:"Cancel"};
 const PICS=["Aji","Fahrizal"];
 let drafs=[], editId=null, plans=[], planEditId=null;
+const planOpen=new Set(); // id konten yang sedang dibuka detailnya
 const cmp=(a,b)=>String(a).localeCompare(String(b),"id",{sensitivity:"base"});
 const nkey=s=>String(s==null?"":s).trim().replace(/\s+/g," ").toLowerCase();
 const todayIso=()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
@@ -1024,16 +1031,16 @@ function planSumHtml(list,sel){
 const planActive=p=>!["done","posted","rejected"].includes(skey(p.status));
 function planCard(p,ed){
   const k=skey(p.status), dt=(l,v,chip)=>v?`<span>${l}: <b>${esc(fmtD(v))}</b>${chip||""}</span>`:"";
-  return `<div class="dc ${k==="rejected"?"batal":""}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span class="dst p-${k}">${esc(p.status||"-")}</span></div>
+  return `<div class="dc pcx ${k==="rejected"?"batal":""}${planOpen.has(p.id)?" open":""}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span><span class="dst p-${k}">${esc(p.status||"-")}</span><span class="pchev" aria-hidden="true">\u25BE</span></span></div>
     <div class="dmeta">${p.type?`<span>🎬 <b>${esc(p.type)}</b></span>`:""}${p.brand?`<span>🏷️ <b>${esc(p.brand)}</b></span>`:""}${p.platform?`<span>📱 <b>${esc(p.platform)}</b></span>`:""}${p.pillar?`<span>🧭 <b>${esc(p.pillar)}</b></span>`:""}</div>
     <div class="dmeta"><span>✍️ Copywriting: <b>${esc(p.picCw||"-")}</b></span><span>🎨 PIC Desain: <b>${esc(p.picDs||"-")}</b></span></div>
     <div class="dmeta">${dt("📝 Draft",p.draft)}${dt("⏰ Deadline",p.deadline,planActive(p)?" "+dueChip(p.deadline,true):"")}${dt("✅ Selesai",p.done)}${dt("🚀 Upload",p.upload)}${!(p.draft||p.deadline||p.done||p.upload)?"<span>Tanggal belum diisi</span>":""}</div>
-    ${p.concept?`<pre><b>Concept:</b> ${esc(p.concept)}</pre>`:""}
+    <div class="pdet">${p.concept?`<pre><b>Concept:</b> ${esc(p.concept)}</pre>`:""}
     ${linksHtml(p)}
     ${p.caption?`<pre><b>Caption:</b> ${esc(p.caption)}</pre>`:""}
     ${desRel(p)}
     ${role==="admin"?planStatusBar(p):""}
-    <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div>`;
+    <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div></div>`;
 }
 function planTable(list,ed){
   const H=["Judul","Status","Type","Brand","Platform","Content Pillar","PIC Copywriting","PIC Desain","Draft","Deadline","DONE","UPLOAD","Concept","URL File","Caption","Desain"];
@@ -1109,6 +1116,10 @@ $("pList").addEventListener("change",e=>{
   const p=plans.find(x=>x.id===+el.closest("[data-id]").dataset.id); if(p) setPlanStatus(p,el.value);
 });
 $("pList").addEventListener("click",e=>{
+  const card=e.target.closest(".dc.pcx");
+  if(card&&!e.target.closest(".pdet,button,a,select,input,textarea")&&!(window.getSelection&&String(getSelection()))){
+    const id=+card.dataset.id, o=card.classList.toggle("open"); o?planOpen.add(id):planOpen.delete(id); return;
+  }
   const b=e.target.closest("button[data-a]"); if(!b) return;
   const p=plans.find(x=>x.id===+b.closest("[data-id]").dataset.id); if(!p) return;
   const a=b.dataset.a;
