@@ -245,6 +245,10 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .dst.p-rejected{background:var(--bad-soft);color:var(--bad)}
 .dst.p-done{background:var(--ok-soft);color:var(--ok)}
 .dst.p-posted{background:var(--pri-soft);color:var(--pri)}
+.dst.p-notstarted{background:var(--field);color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}
+.dst.p-inprogress{background:var(--pri-soft);color:var(--pri)}
+.dst.p-cancel{background:var(--bad-soft);color:var(--bad)}
+.dst.p-revisi{background:var(--na-soft);color:var(--na)}
 .seg.wrap{flex-wrap:wrap}
 .seg button.on.g{background:var(--field);color:var(--ink);box-shadow:inset 0 0 0 1px var(--mute)}
 .drow4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -919,7 +923,7 @@ $("dList").addEventListener("click",e=>{
 /* ---------- Content Plan Digital Marketing (mengikuti tabel di Google Sheets) ---------- */
 // Pilihan bawaan. Kalau dropdown di spreadsheet bisa dibaca, daftar ini diganti otomatis dengan isi dropdown di sana.
 const OPT={
-  status:["Draft","Approved","Rejected","Done","Posted/ Scheduled"],
+  status:["Draft","Approved","Rejected","Done","Posted/ Scheduled","Not Started","In Progress","Cancel","Revisi"],
   type:["Feed","Reel"],
   brand:["POSI","POSI Store","Smart Champion"],
   platform:["Instagram","TikTok","YouTube","Facebook","Lainnya"],
@@ -930,14 +934,17 @@ const OPT={
 const OPTX={}; // pilihan tambahan buatan Drafter (belum tentu sudah tersimpan di konten)
 const OPT_LABEL={type:"Type",brand:"Brand",platform:"Platform",pillar:"Content Pillar",picCw:"PIC Copywriting",picDs:"PIC Desain"};
 const DONE_KEYS=["done","posted"];
-const skey=st=>{ const t=nkey(st); return t.startsWith("approv")?"approved":t.startsWith("reject")?"rejected":t==="done"?"done":t.startsWith("post")?"posted":"draft"; };
+const OUT_KEYS=["rejected","cancel"]; // tidak dihitung aktif
+const EDITOR_ST=["Not Started","In Progress","Cancel","Done","Revisi"]; // pilihan status untuk Editor
+const DRAFTER_ST=["Draft","Approved","Rejected","Done","Posted/ Scheduled"]; // Approve/Reject/Posted hanya Drafter
+const skey=st=>{ const t=nkey(st); return t.startsWith("approv")?"approved":t.startsWith("reject")?"rejected":t==="done"?"done":t.startsWith("post")?"posted":t.startsWith("not start")?"notstarted":t.startsWith("in prog")?"inprogress":t.startsWith("cancel")?"cancel":t.startsWith("revisi")?"revisi":"draft"; };
 const isSiap=p=>DONE_KEYS.includes(skey(p.status));
-const isRej=p=>skey(p.status)==="rejected";
+const isRej=p=>OUT_KEYS.includes(skey(p.status)); // rejected atau cancel
 const isBelum=p=>!isSiap(p)&&!isRej(p);
 const rankOf=(p,m)=>{ const r=isBelum(p)?0:isSiap(p)?1:2; return m==="siap"?(r===0?1:r===1?0:2):r; };
 const RLABEL=["Belum siap","Sudah siap","Rejected"];
 const newStatus=()=>OPT.status.find(s=>skey(s)==="draft")||"Draft";
-const SEGCLS={draft:"g",approved:"p",rejected:"c",done:"s",posted:"n"};
+const SEGCLS={draft:"g",approved:"p",rejected:"c",done:"s",posted:"n",notstarted:"g",inprogress:"n",cancel:"c",revisi:"p"};
 let planMode="card";
 function normPlan(r){
   const o={id:r.id};
@@ -968,6 +975,7 @@ function applyOpts(o){
 // Gabungkan pilihan dari spreadsheet + pilihan tambahan + nilai yang sudah dipakai di konten tersimpan
 function mergePlanOpts(){
   Object.keys(OPT_LABEL).forEach(k=>{ OPT[k]=uniqNames([...OPT[k],...(OPTX[k]||[]),...plans.map(p=>p[k])]); });
+  OPT.status=uniqNames([...OPT.status,...DRAFTER_ST,...EDITOR_ST,...plans.map(p=>p.status)]);
   fillPlanSelects();
 }
 function addOpt(k,selId){
@@ -986,7 +994,7 @@ function getPlan(){
   if(!role) return Promise.resolve();
   return api({action:"cp_list"}).then(r=>{ applyOpts(r.opts); plans=uniqNewest((r.plan||[]).map(normPlan),planKey); mergePlanOpts(); renderDP(); }).catch(e=>{ console.error("cp_list",e); toast("Gagal memuat Content Plan: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":e.message==="unauthorized"?"akses belum diizinkan di Apps Script":errMsg(e)),6000); });
 }
-const planStatusBar=p=>`<div class="stbar"><span>Ubah status:</span><div class="seg wrap" role="group" aria-label="Status ${esc(p.judul)}">${OPT.status.map(k=>`<button type="button" class="${SEGCLS[skey(k)]} ${p.status===k?"on":""}" data-a="pst" data-v="${esc(k)}" aria-pressed="${p.status===k}">${esc(k)}</button>`).join("")}</div></div>`;
+const planStatusBar=p=>`<div class="stbar"><span>Ubah status:</span><div class="seg wrap" role="group" aria-label="Status ${esc(p.judul)}">${EDITOR_ST.map(k=>`<button type="button" class="${SEGCLS[skey(k)]} ${p.status===k?"on":""}" data-a="pst" data-v="${esc(k)}" aria-pressed="${p.status===k}">${esc(k)}</button>`).join("")}</div></div>`;
 function renderDP(){ if(view==="draf") renderDraf(); if(view==="plan") renderPlan(); }
 function fillDesList(want){
   const sel=$("pDes"), cur=want!==undefined?String(want):sel.value;
@@ -1020,18 +1028,18 @@ function planSumHtml(list,sel){
   const actAll=list.filter(p=>!isRej(p)), sp=actAll.filter(isSiap).length, pa=actAll.length?Math.round(sp/actAll.length*100):0, rj=list.length-actAll.length;
   let out=`<div class="ps"><div class="pst"><b>Kesiapan konten</b><span>${pa}%</span></div><div class="bar"><i style="width:${pa}%;${pa===100?"background:var(--ok)":""}"></i></div><div class="psm">${sp} sudah siap · ${actAll.length-sp} belum siap${rj?` · ${rj} rejected`:""}</div></div>`;
   out+=names.map(n=>{
-    const mine=list.filter(p=>p.picDs===n), act=mine.filter(p=>skey(p.status)!=="rejected"), done=act.filter(p=>DONE_KEYS.includes(skey(p.status))).length, cx=mine.length-act.length;
+    const mine=list.filter(p=>p.picDs===n), act=mine.filter(p=>!OUT_KEYS.includes(skey(p.status))), done=act.filter(p=>DONE_KEYS.includes(skey(p.status))).length, cx=mine.length-act.length;
     const pct=act.length?Math.round(done/act.length*100):0;
-    return `<div class="ps"><div class="pst"><b>${esc(n)}</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%;${pct===100?"background:var(--ok)":""}"></i></div><div class="psm">PIC Desain · ${done} siap dari ${act.length} aktif${cx?` · ${cx} rejected`:""}</div></div>`;
+    return `<div class="ps"><div class="pst"><b>${esc(n)}</b><span>${pct}%</span></div><div class="bar"><i style="width:${pct}%;${pct===100?"background:var(--ok)":""}"></i></div><div class="psm">PIC Desain · ${done} siap dari ${act.length} aktif${cx?` · ${cx} batal/rejected`:""}</div></div>`;
   }).join("");
   const nopic=list.filter(p=>!p.picDs).length;
   if(!sel&&nopic) out+=`<div class="psm" style="grid-column:1/-1">${nopic} konten belum punya PIC Desain (tidak masuk persentase)</div>`;
   return out;
 }
-const planActive=p=>!["done","posted","rejected"].includes(skey(p.status));
+const planActive=p=>![...DONE_KEYS,...OUT_KEYS].includes(skey(p.status));
 function planCard(p,ed){
   const k=skey(p.status), dt=(l,v,chip)=>v?`<span>${l}: <b>${esc(fmtD(v))}</b>${chip||""}</span>`:"";
-  return `<div class="dc pcx ${k==="rejected"?"batal":""}${planOpen.has(p.id)?" open":""}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span><span class="dst p-${k}">${esc(p.status||"-")}</span><span class="pchev" aria-hidden="true">\u25BE</span></span></div>
+  return `<div class="dc pcx ${OUT_KEYS.includes(k)?"batal":""}${planOpen.has(p.id)?" open":""}" data-id="${p.id}"><div class="top"><span class="jn">${esc(p.judul)}</span><span><span class="dst p-${k}">${esc(p.status||"-")}</span><span class="pchev" aria-hidden="true">\u25BE</span></span></div>
     <div class="dmeta">${p.type?`<span>🎬 <b>${esc(p.type)}</b></span>`:""}${p.brand?`<span>🏷️ <b>${esc(p.brand)}</b></span>`:""}${p.platform?`<span>📱 <b>${esc(p.platform)}</b></span>`:""}${p.pillar?`<span>🧭 <b>${esc(p.pillar)}</b></span>`:""}</div>
     <div class="dmeta"><span>✍️ Copywriting: <b>${esc(p.picCw||"-")}</b></span><span>🎨 PIC Desain: <b>${esc(p.picDs||"-")}</b></span></div>
     <div class="dmeta">${dt("📝 Draft",p.draft)}${dt("⏰ Deadline",p.deadline,planActive(p)?" "+dueChip(p.deadline,true):"")}${dt("✅ Selesai",p.done)}${dt("🚀 Upload",p.upload)}${!(p.draft||p.deadline||p.done||p.upload)?"<span>Tanggal belum diisi</span>":""}</div>
@@ -1046,7 +1054,7 @@ function planTable(list,ed){
   const H=["Judul","Status","Type","Brand","Platform","Content Pillar","PIC Copywriting","PIC Desain","Draft","Deadline","DONE","UPLOAD","Concept","URL File","Caption","Desain"];
   const rows=list.map(p=>{
     const ds=p.desain?drafs.find(x=>x.id===p.desain):null, ls=linkList(p);
-    return `<tr data-id="${p.id}"><td class="c1">${esc(p.judul)}</td><td>${role==="admin"?`<select class="stsel" data-st="1">${(OPT.status.includes(p.status)||!p.status?OPT.status:[...OPT.status,p.status]).map(o=>`<option value="${esc(o)}"${o===p.status?" selected":""}>${esc(o)}</option>`).join("")}</select>`:`<span class="dst p-${skey(p.status)}">${esc(p.status||"-")}</span>`}</td><td>${esc(p.type)}</td><td>${esc(p.brand)}</td><td>${esc(p.platform)}</td><td>${esc(p.pillar)}</td><td>${esc(p.picCw)}</td><td>${esc(p.picDs)}</td><td>${esc(fmtD(p.draft))}</td><td>${esc(fmtD(p.deadline))}</td><td>${esc(fmtD(p.done))}</td><td>${esc(fmtD(p.upload))}</td><td class="cc">${esc(p.concept)}</td><td>${ls.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Link${ls.length>1?" "+(i+1):""}</a>`).join("")}</td><td class="cc">${esc(p.caption)}</td><td>${ds?`<button type="button" class="lk" data-a="godes">${esc(ds.jenis)} · ${STATUS[ds.status]}</button>`:""}</td>${ed?`<td class="ta"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></td>`:""}</tr>`;
+    return `<tr data-id="${p.id}"><td class="c1">${esc(p.judul)}</td><td>${role==="admin"?`<select class="stsel" data-st="1">${(EDITOR_ST.includes(p.status)||!p.status?EDITOR_ST:[...EDITOR_ST,p.status]).map(o=>`<option value="${esc(o)}"${o===p.status?" selected":""}>${esc(o)}</option>`).join("")}</select>`:`<span class="dst p-${skey(p.status)}">${esc(p.status||"-")}</span>`}</td><td>${esc(p.type)}</td><td>${esc(p.brand)}</td><td>${esc(p.platform)}</td><td>${esc(p.pillar)}</td><td>${esc(p.picCw)}</td><td>${esc(p.picDs)}</td><td>${esc(fmtD(p.draft))}</td><td>${esc(fmtD(p.deadline))}</td><td>${esc(fmtD(p.done))}</td><td>${esc(fmtD(p.upload))}</td><td class="cc">${esc(p.concept)}</td><td>${ls.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">Link${ls.length>1?" "+(i+1):""}</a>`).join("")}</td><td class="cc">${esc(p.caption)}</td><td>${ds?`<button type="button" class="lk" data-a="godes">${esc(ds.jenis)} · ${STATUS[ds.status]}</button>`:""}</td>${ed?`<td class="ta"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></td>`:""}</tr>`;
   }).join("");
   return `<div class="tblw"><table class="tbl"><thead><tr>${H.map(h=>`<th>${h}</th>`).join("")}${ed?"<th></th>":""}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -1100,7 +1108,7 @@ $("pSave").addEventListener("click",()=>{
   api({action:"cp_save",item}).then(()=>toast("Konten tersimpan ✓")).catch(e=>{ console.error("cp_save",e); toast("Gagal menyimpan konten: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000); getPlan(); });
 });
 function setPlanStatus(p,s){
-  if(role!=="admin"||p.status===s) return;
+  if(role!=="admin"||p.status===s||!EDITOR_ST.includes(s)) return;
   const old={status:p.status,done:p.done};
   p.status=s; p.done=DONE_KEYS.includes(skey(s))?(p.done||todayIso()):""; renderPlan();
   api({action:"cp_status",id:p.id,status:s}).then(r=>{
