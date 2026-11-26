@@ -294,6 +294,14 @@ body{padding:16px 16px 70px}
 .pchev{display:inline-block;margin-left:8px;color:var(--mute);font-size:13px;transition:transform .15s}
 .dc.pcx.open .pchev{transform:rotate(180deg)}
 .dc.pcx .pdet{border-top:1px dashed var(--line);padding-top:8px}
+.fthumbs,.fgal{display:flex;flex-wrap:wrap;gap:8px}
+.fgal{margin-top:8px}
+.fth{position:relative;width:84px;height:84px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.fth img{width:100%;height:100%;object-fit:cover;display:block}
+.fth button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:99px;border:0;background:rgba(15,23,42,.78);color:#fff;cursor:pointer;font-size:14px;line-height:1}
+.fgal img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:zoom-in;background:var(--field)}
+#lb{position:fixed;inset:0;background:rgba(2,6,23,.88);display:none;align-items:center;justify-content:center;z-index:100;cursor:zoom-out;padding:20px}
+#lb.on{display:flex}#lb img{max-width:100%;max-height:100%;border-radius:12px}
 .brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px}
 .brand img{display:block;width:100%;max-width:190px;border-radius:0;padding:0}
 .brand span{color:#475569;font-weight:800;font-size:11.5px;letter-spacing:.2em}
@@ -349,6 +357,10 @@ body{padding:16px 16px 70px}
       <button type="button" class="ladd" id="dAddLink">+ Tambah link</button>
       <p class="dhint">Bisa lebih dari satu link (maks. 10). Atur akses link ke “Siapa saja yang memiliki link” supaya Desain Grafis bisa membukanya.</p>
       <div class="dfield"><label for="dDl">Deadline desain</label><input id="dDl" type="date"></div>
+      <label>Foto flyer (opsional, maks. 4)</label>
+      <input type="file" id="dFile" accept="image/*" multiple hidden>
+      <div class="fthumbs" id="dFotos"></div>
+      <button type="button" class="ladd" id="dAddFoto">+ Tambah foto</button>
       <div class="drow"><button class="btn pri" id="dSave">Simpan draf</button><button class="btn ghost" id="dCancel" hidden>Batal edit</button></div>
       <datalist id="evList"></datalist>
     </div>
@@ -380,6 +392,10 @@ body{padding:16px 16px 70px}
       <textarea id="pLink" rows="2" placeholder="URL File (opsional, Drive / Canva / dll.). Satu link per baris" maxlength="1500"></textarea>
       <textarea id="pCaption" rows="3" placeholder="Caption (opsional)" maxlength="2000"></textarea>
       <div class="dfield"><label for="pDes">Hubungkan ke desain di List Desain (opsional)</label><select id="pDes"><option value="">Tidak dihubungkan ke desain</option></select></div>
+      <label>Foto konten (opsional, maks. 4)</label>
+      <input type="file" id="pFile" accept="image/*" multiple hidden>
+      <div class="fthumbs" id="pFotos"></div>
+      <button type="button" class="ladd" id="pAddFoto">+ Tambah foto</button>
       <div class="drow"><button class="btn pri" id="pSave">Simpan konten</button><button class="btn ghost" id="pCancel" hidden>Batal edit</button></div>
     </div>
     <div class="dtools t3"><input class="search" id="pq" placeholder="Cari konten…" aria-label="Cari konten"><select id="pFSt" aria-label="Filter status"></select><select id="pFBrand" aria-label="Filter brand"></select><select id="pFCw" aria-label="Filter PIC Copywriting"></select><select id="pFPic" aria-label="Filter PIC Desain"></select><select id="pFSiap" aria-label="Filter kesiapan"><option value="">Siap &amp; belum siap</option><option value="siap">Sudah siap</option><option value="belum">Belum siap</option></select><select id="pSort" aria-label="Urutan"><option value="">Urut tanggal</option><option value="belum">Belum siap dulu</option><option value="siap">Sudah siap dulu</option></select></div>
@@ -790,9 +806,9 @@ function normDraf(r){
   if(s.charAt(0)==="{"){ try{ m=JSON.parse(s); }catch(e){} }
   const st=(m&&m.s)||r.status, pic=(m&&m.p)||r.pic;
   return {id:r.id,event:r.event,jenis:r.jenis,link:(m&&typeof m.u==="string")?m.u:s,
-    status:STATUS[st]?st:"proses",pic:PICS.includes(pic)?pic:"",deadline:(m&&m.dl)||r.deadline||"",uploaded:(m&&m.up)||r.uploaded||"",savedAt:r.savedAt||""};
+    status:STATUS[st]?st:"proses",pic:PICS.includes(pic)?pic:"",deadline:(m&&m.dl)||r.deadline||"",uploaded:(m&&m.up)||r.uploaded||"",savedAt:r.savedAt||"",fotos:Array.isArray(r.fotos)?r.fotos.map(String):[]};
 }
-const toItem=d=>({id:d.id,event:d.event,jenis:d.jenis,isi:JSON.stringify({u:d.link,s:d.status,dl:d.deadline,up:d.uploaded,p:d.pic}),savedAt:d.savedAt,status:d.status,deadline:d.deadline,uploaded:d.uploaded,pic:d.pic});
+const toItem=d=>({id:d.id,event:d.event,jenis:d.jenis,isi:JSON.stringify({u:d.link,s:d.status,dl:d.deadline,up:d.uploaded,p:d.pic}),savedAt:d.savedAt,status:d.status,deadline:d.deadline,uploaded:d.uploaded,pic:d.pic,fotos:d.fotos||[]});
 const saveDraf=d=>api({action:"draf_save",item:toItem(d)});
 function getDraf(){
   if(!role) return Promise.resolve();
@@ -819,7 +835,7 @@ function renderDraf(){
     list.filter(d=>nkey(d.event)===nkey(ev)).sort((a,b)=>(Number(b.id)||0)-(Number(a.id)||0)||cmp(a.jenis,b.jenis)).forEach(d=>{ // draf terbaru di atas
       out+=`<div class="dc ${d.status}" data-id="${d.id}"><div class="top"><span class="jn">${esc(d.jenis)}</span><span class="dst ${d.status}">${STATUS[d.status]}</span></div>
         <div class="dmeta"><span>👤 PIC: <b>${esc(d.pic||"Belum ada PIC")}</b></span><span>📤 Upload: <b>${esc(fmtD(d.uploaded)||d.savedAt||"-")}</b></span><span>⏰ Deadline: <b>${d.deadline?esc(fmtD(d.deadline)):"Belum diatur"}</b> ${dueChip(d.deadline,d.status==="proses")}</span><span>Diperbarui ${esc(d.savedAt||"")}</span></div>
-        ${docBlock(d)}
+        ${docBlock(d)}${fotoBlock(d)}
         ${relHtml(d)}
         ${role==="admin"?statusBar(d):""}
         <div class="acts"><button data-a="copy">Salin link</button><span class="dronly" style="display:contents"><button data-a="edit">Edit</button><button class="del" data-a="del">Hapus</button></span></div></div>`;
@@ -868,7 +884,37 @@ function docBlock(d){
   const n=ls.length>1;
   return `<div class="dlink">${ls.map((u,i)=>`<a class="open" href="${esc(u)}" target="_blank" rel="noopener noreferrer">\u{1F4C4} ${n?"Buka draf "+(i+1):"Buka draf"}</a>${docId(u)?`<button type="button" data-a="prev" data-i="${i}">Pratinjau${n?" "+(i+1):""}</button>`:""}`).join("")}</div><div class="pv"></div>`;
 }
-function resetDForm(){ editId=null; setLinkRows([]); $("dJenis").value=""; $("dDl").value=""; $("dPicIn").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; renderJChips(); }
+/* ---- foto flyer: Drive ID (sudah tersimpan) atau data URL (baru dipilih) ---- */
+const MAX_FOTO=4; let formFotos=[];
+const fotoSrc=(f,w)=>String(f).startsWith("data:")?f:"https://drive.google.com/thumbnail?id="+encodeURIComponent(f)+"&sz=w"+(w||800);
+function renderFotoThumbs(){
+  $("dFotos").innerHTML=formFotos.map((f,i)=>`<div class="fth"><img src="${esc(fotoSrc(f,300))}" alt="Foto ${i+1}" referrerpolicy="no-referrer"><button type="button" data-i="${i}" title="Hapus foto" aria-label="Hapus foto ${i+1}">\u00d7</button></div>`).join("");
+  $("dAddFoto").hidden=formFotos.length>=MAX_FOTO;
+}
+function readImg(file){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{ const k=Math.min(1,1280/Math.max(im.width,im.height)), c=document.createElement("canvas");
+      c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg",0.8)); };
+    im.onerror=()=>{ URL.revokeObjectURL(u); rej(new Error("gambar tidak terbaca")); };
+    im.src=u;
+  });
+}
+$("dAddFoto").addEventListener("click",()=>$("dFile").click());
+$("dFile").addEventListener("change",async()=>{
+  const files=[...$("dFile").files].filter(f=>/^image\//.test(f.type)); $("dFile").value="";
+  const room=MAX_FOTO-formFotos.length;
+  if(files.length>room) toast("Maksimal "+MAX_FOTO+" foto per draf");
+  for(const f of files.slice(0,room)){ try{ formFotos.push(await readImg(f)); }catch(e){ toast("Foto tidak bisa dibaca"); } }
+  renderFotoThumbs();
+});
+$("dFotos").addEventListener("click",e=>{ const b=e.target.closest("button[data-i]"); if(!b) return; formFotos.splice(+b.dataset.i,1); renderFotoThumbs(); });
+const fotoBlock=d=>(d.fotos&&d.fotos.length)?`<div class="fgal">${d.fotos.map((f,i)=>`<img src="${esc(fotoSrc(f,400))}" data-f="${i}" loading="lazy" referrerpolicy="no-referrer" alt="Foto ${i+1} ${esc(d.jenis||d.judul||"")}">`).join("")}</div>`:"";
+const lb=document.createElement("div"); lb.id="lb"; lb.innerHTML='<img alt="">'; document.body.appendChild(lb);
+lb.addEventListener("click",()=>lb.classList.remove("on"));
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") lb.classList.remove("on"); });
+function resetDForm(){ editId=null; formFotos=[]; renderFotoThumbs(); setLinkRows([]); $("dJenis").value=""; $("dDl").value=""; $("dPicIn").value=""; $("dCancel").hidden=true; $("dSave").textContent="Simpan draf"; renderJChips(); }
 $("dq").addEventListener("input",renderDraf);
 $("dFilter").addEventListener("change",renderDraf);
 $("dStat").addEventListener("change",renderDraf);
@@ -879,10 +925,11 @@ $("dSave").addEventListener("click",()=>{
   if(!ev0||!jn||!pic||!link||!dl){ toast("Event, jenis desain, PIC, link draf, dan deadline wajib diisi"); return; }
   if(links.some(x=>!isUrl(x))){ toast("Semua link draf harus diawali https://",4000); return; }
   const ev=canonEvent(ev0), old=drafs.find(x=>x.id===editId);
-  const item={id:editId||Date.now(),event:ev,jenis:jn,link,pic,status:old?old.status:"proses",deadline:dl,uploaded:(old&&old.uploaded)||todayIso(),savedAt:nowStr()};
+  const item={id:editId||Date.now(),event:ev,jenis:jn,link,pic,status:old?old.status:"proses",deadline:dl,uploaded:(old&&old.uploaded)||todayIso(),savedAt:nowStr(),fotos:[...formFotos]};
   if(drafs.some(x=>x.id!==item.id&&drafKey(x)===drafKey(item))){ toast(`Draf ${jn} untuk "${ev}" sudah ada, tidak boleh double. Gunakan Edit pada draf yang ada.`,5000); return; }
   drafs=drafs.filter(d=>d.id!==item.id); drafs.push(item); resetDForm(); renderDraf();
-  saveDraf(item).then(()=>{
+  saveDraf(item).then(r=>{
+    if(r&&r.item&&Array.isArray(r.item.fotos)){ const x=drafs.find(z=>z.id===item.id); if(x){ x.fotos=r.item.fotos; renderDraf(); } }
     toast("Draf tersimpan ✓");
   }).catch(e=>{ console.error("draf_save",e); toast("Gagal menyimpan draf: "+errMsg(e),6000); getDraf(); });
 });
@@ -896,6 +943,8 @@ function setStatus(d,s){
   });
 }
 $("dList").addEventListener("click",e=>{
+  const im=e.target.closest(".fgal img");
+  if(im){ const dd=drafs.find(x=>x.id===+im.closest(".dc").dataset.id), f=dd&&dd.fotos[+im.dataset.f]; if(f){ lb.firstChild.src=fotoSrc(f,1600); lb.classList.add("on"); } return; }
   const b=e.target.closest("button[data-a]"); if(!b) return;
   const d=drafs.find(x=>x.id===+b.closest(".dc").dataset.id); if(!d) return;
   const a=b.dataset.a;
@@ -913,7 +962,7 @@ $("dList").addEventListener("click",e=>{
   if(role!=="drafter") return;
   if(a==="edit"){
     editId=d.id; $("dEvent").value=d.event; $("dJenis").value=d.jenis; { const ls=draftLinks(d); setLinkRows(ls.length?ls:[d.link]); } renderJChips(); $("dDl").value=String(d.deadline||"").slice(0,10); $("dPicIn").value=d.pic||"";
-    $("dCancel").hidden=false; $("dSave").textContent="Perbarui draf"; window.scrollTo({top:0,behavior:"smooth"}); $("dLinks").querySelector("input").focus();
+    formFotos=[...(d.fotos||[])]; renderFotoThumbs(); $("dCancel").hidden=false; $("dSave").textContent="Perbarui draf"; window.scrollTo({top:0,behavior:"smooth"}); $("dLinks").querySelector("input").focus();
   }else if(a==="del"){
     drafs=drafs.filter(x=>x.id!==d.id); renderDraf();
     api({action:"draf_delete",id:d.id}).then(()=>toast("Draf dihapus")).catch(e=>{ console.error("draf_delete",e); toast("Gagal menghapus draf: "+errMsg(e),6000); getDraf(); });
@@ -951,6 +1000,7 @@ function normPlan(r){
   ["judul","status","type","brand","platform","pillar","picCw","picDs","concept","link","caption"].forEach(k=>{ o[k]=String(r[k]==null?"":r[k]); });
   ["draft","deadline","done","upload"].forEach(k=>{ o[k]=String(r[k]||"").slice(0,10); });
   o.desain=Number(r.desain)||0;
+  o.fotos=Array.isArray(r.fotos)?r.fotos.map(String):[];
   return o;
 }
 function fillSel(id,list,ph,keep){
@@ -1046,6 +1096,7 @@ function planCard(p,ed){
     <div class="pdet">${p.concept?`<pre><b>Concept:</b> ${esc(p.concept)}</pre>`:""}
     ${linksHtml(p)}
     ${p.caption?`<pre><b>Caption:</b> ${esc(p.caption)}</pre>`:""}
+    ${fotoBlock(p)}
     ${desRel(p)}
     ${role==="admin"?planStatusBar(p):""}
     <div class="acts"><span class="edonly" style="display:contents"><button data-a="pedit">Edit</button><button class="del" data-a="pdel">Hapus</button></span></div></div></div>`;
@@ -1081,8 +1132,23 @@ function renderPlan(){
   });
   $("pList").innerHTML=out;
 }
+/* ---- foto konten (sama dengan foto draf) ---- */
+let planFotos=[];
+function renderPlanThumbs(){
+  $("pFotos").innerHTML=planFotos.map((f,i)=>`<div class="fth"><img src="${esc(fotoSrc(f,300))}" alt="Foto ${i+1}" referrerpolicy="no-referrer"><button type="button" data-i="${i}" title="Hapus foto" aria-label="Hapus foto ${i+1}">\u00d7</button></div>`).join("");
+  $("pAddFoto").hidden=planFotos.length>=MAX_FOTO;
+}
+$("pAddFoto").addEventListener("click",()=>$("pFile").click());
+$("pFile").addEventListener("change",async()=>{
+  const files=[...$("pFile").files].filter(f=>/^image\//.test(f.type)); $("pFile").value="";
+  const room=MAX_FOTO-planFotos.length;
+  if(files.length>room) toast("Maksimal "+MAX_FOTO+" foto per konten");
+  for(const f of files.slice(0,room)){ try{ planFotos.push(await readImg(f)); }catch(e){ toast("Foto tidak bisa dibaca"); } }
+  renderPlanThumbs();
+});
+$("pFotos").addEventListener("click",e=>{ const b=e.target.closest("button[data-i]"); if(!b) return; planFotos.splice(+b.dataset.i,1); renderPlanThumbs(); });
 function resetPForm(){
-  planEditId=null;
+  planEditId=null; planFotos=[]; renderPlanThumbs();
   ["pJudul","pConcept","pLink","pCaption","pDraft","pDeadline","pUpload"].forEach(i=>{ $(i).value=""; });
   ["pType","pBrand","pPlat","pPil","pCw","pDs","pDes"].forEach(i=>{ $(i).value=""; });
   $("pCancel").hidden=true; $("pSave").textContent="Simpan konten";
@@ -1102,10 +1168,10 @@ $("pSave").addEventListener("click",()=>{
   const old=plans.find(x=>x.id===planEditId);
   const item={id:planEditId||Date.now(),judul,status:old?old.status:newStatus(),type,brand,platform:$("pPlat").value,pillar:$("pPil").value,picCw:$("pCw").value,picDs:$("pDs").value,
     draft:$("pDraft").value,deadline:$("pDeadline").value,done:old?old.done:"",upload:$("pUpload").value,concept:$("pConcept").value.trim(),caption:$("pCaption").value.trim(),
-    link:links.join("\n"),desain:$("pDes").value?Number($("pDes").value):0};
+    link:links.join("\n"),desain:$("pDes").value?Number($("pDes").value):0,fotos:[...planFotos]};
   if(plans.some(x=>x.id!==item.id&&planKey(x)===planKey(item))){ toast("Konten itu sudah ada (judul, brand, platform, dan type sama), tidak boleh double. Gunakan Edit.",5000); return; }
   plans=plans.filter(x=>x.id!==item.id); plans.push(item); resetPForm(); renderPlan();
-  api({action:"cp_save",item}).then(()=>toast("Konten tersimpan ✓")).catch(e=>{ console.error("cp_save",e); toast("Gagal menyimpan konten: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000); getPlan(); });
+  api({action:"cp_save",item}).then(r=>{ if(r&&r.item&&Array.isArray(r.item.fotos)){ const x=plans.find(z=>z.id===item.id); if(x){ x.fotos=r.item.fotos; renderPlan(); } } toast("Konten tersimpan ✓"); }).catch(e=>{ console.error("cp_save",e); toast("Gagal menyimpan konten: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000); getPlan(); });
 });
 function setPlanStatus(p,s){
   if(role!=="admin"||p.status===s||!EDITOR_ST.includes(s)) return;
@@ -1124,6 +1190,8 @@ $("pList").addEventListener("change",e=>{
   const p=plans.find(x=>x.id===+el.closest("[data-id]").dataset.id); if(p) setPlanStatus(p,el.value);
 });
 $("pList").addEventListener("click",e=>{
+  const im=e.target.closest(".fgal img");
+  if(im){ const pp=plans.find(x=>x.id===+im.closest("[data-id]").dataset.id), f=pp&&pp.fotos[+im.dataset.f]; if(f){ lb.firstChild.src=fotoSrc(f,1600); lb.classList.add("on"); } return; }
   const card=e.target.closest(".dc.pcx");
   if(card&&!e.target.closest(".pdet,button,a,select,input,textarea")&&!(window.getSelection&&String(getSelection()))){
     const id=+card.dataset.id, o=card.classList.toggle("open"); o?planOpen.add(id):planOpen.delete(id); return;
@@ -1135,7 +1203,7 @@ $("pList").addEventListener("click",e=>{
   if(a==="pst"){ setPlanStatus(p,b.dataset.v); return; }
   if(role!=="drafter") return;
   if(a==="pedit"){
-    planEditId=p.id; $("pJudul").value=p.judul; $("pConcept").value=p.concept; $("pLink").value=p.link; $("pCaption").value=p.caption;
+    planEditId=p.id; $("pJudul").value=p.judul; $("pConcept").value=p.concept; $("pLink").value=p.link; $("pCaption").value=p.caption; planFotos=[...(p.fotos||[])]; renderPlanThumbs();
     setSel("pType",p.type); setSel("pBrand",p.brand); setSel("pPlat",p.platform); setSel("pPil",p.pillar); setSel("pCw",p.picCw); setSel("pDs",p.picDs);
     $("pDraft").value=p.draft; $("pDeadline").value=p.deadline; $("pUpload").value=p.upload; fillDesList(p.desain||"");
     $("pCancel").hidden=false; $("pSave").textContent="Perbarui konten"; window.scrollTo({top:0,behavior:"smooth"}); $("pJudul").focus();
