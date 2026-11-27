@@ -575,7 +575,7 @@ let state = { nama:"", tgl:"", checked:{}, custom:[], notes:{}, files:{}, histor
 let filter = "all", query = "";
 const PAGE_ROLE="viewer";
 /* Tiga halaman saling terhubung: data sama (API_URL sama), sandi disimpan per peran */
-const PAGES={viewer:"index.html",admin:"editor.html",drafter:"drafter.html"};
+const PAGES={viewer:"index.html",admin:"index.html",drafter:"index.html"};
 const PK="cek-pass-"+PAGE_ROLE;
 let role=PAGE_ROLE, pass="", poller=null;
 if(role!=="viewer"){ try{ pass=localStorage.getItem(PK)||""; }catch(e){} }
