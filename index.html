@@ -181,7 +181,15 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 #events{display:none;max-width:820px;margin:0 auto}.ro #events{display:block}
 .ro .grid{display:none!important}
 .mh{font-size:14px;font-weight:700;color:var(--mute);margin:20px 4px 10px}
-.ev{display:grid;grid-template-columns:84px 1fr auto;gap:14px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ro #events{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;max-width:1100px;align-items:start}
+#events .mh,#events .empty{grid-column:1/-1}#events .mh{margin:8px 4px 0}
+.ev{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin:0;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.ev:hover{transform:translateY(-2px)}
+.evh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.evh .date{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 12px;min-width:0}
+.evh .date b{font-size:26px}.evh .date .dm{display:block}
+.evh .pill{font-size:14px;padding:5px 12px}
+.evb{min-width:0}
 .date{background:var(--pri-soft);color:var(--pri);border-radius:16px;text-align:center;padding:8px 0}
 .date b{display:block;font-size:24px;font-weight:800;line-height:1.1}.date span{font-size:11px;font-weight:700;display:block;padding:0 2px}
 .evt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.evt .n{font-weight:800;font-size:16px}
@@ -191,7 +199,7 @@ ul.list{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap
 .cnt .ok{color:var(--ok)}.cnt .no{color:var(--bad)}.cnt .na{color:var(--na)}.cnt .upd{margin-left:auto;font-weight:500}
 .ev details{margin-top:10px;font-size:13px}.ev summary{cursor:pointer;font-weight:700;color:var(--pri)}
 .gt{font-size:12px;font-weight:700;color:var(--mute);margin-top:10px}
-@media(max-width:520px){.ev{grid-template-columns:72px 1fr}.ev .pill{grid-column:2;justify-self:start}.vstats{grid-template-columns:1fr}}
+@media(max-width:520px){.ro #events{grid-template-columns:1fr}.vstats{grid-template-columns:1fr}}
 .nav{display:none;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .r-admin .nav{display:flex}
 .nav button{border:1px solid var(--line);background:var(--card);color:var(--mute);padding:9px 18px;border-radius:12px;font-weight:700;font-size:14px}
@@ -789,13 +797,13 @@ function renderEvents(){
     const nl=items.filter(n=>u.notes[n]&&String(u.notes[n]).trim());
     const nts=nl.length?`<div class="gt">Keterangan · ${nl.length}</div><div class="nts">${nl.map(n=>`<div class="nt"><b>${esc(n)}</b> — ${esc(u.notes[n])}</div>`).join("")}</div>`:"";
     const grp=(t,a,c)=>a.length?`<div class="gt">${t} · ${a.length}</div><div class="tags">${a.map(n=>`<span class="tag ${c}">${esc(n)}</span>`).join("")}</div>`:"";
-    out+=`<article class="ev"><div class="date">${d?`<b>${d.getDate()}</b><span>${MON[d.getMonth()]}</span><span>${d.toLocaleDateString("id-ID",{weekday:"long"})}</span>`:`<b>–</b><span>tgl</span>`}</div>
-      <div><div class="evt"><button type="button" class="n evn" data-ev="${e.id}" title="Klik untuk melihat hasil desain">${esc(e.nama||"Tanpa nama")} <span class="evc">▾</span></button>${st?`<span class="st ${cls}">${st}</span>`:""}</div>
+    out+=`<article class="ev"><div class="evh"><div class="date">${d?`<b>${d.getDate()}</b><span class="dm"><span>${MON[d.getMonth()]} ${d.getFullYear()}</span><span>${d.toLocaleDateString("id-ID",{weekday:"long"})}</span></span>`:`<b>–</b><span>Tanpa tanggal</span>`}</div><span class="pill ${e.percent===100?"full":""}">${e.percent}%</span></div>
+      <div class="evb"><div class="evt"><button type="button" class="n evn" data-ev="${e.id}" title="Klik untuk melihat hasil desain">${esc(e.nama||"Tanpa nama")} <span class="evc">▾</span></button>${st?`<span class="st ${cls}">${st}</span>`:""}</div>
       <div class="bar"><i style="width:${e.percent}%;${e.percent===100?"background:var(--ok)":""}"></i></div>
-      <div class="cnt"><span class="ok">✓ ${ok.length} selesai</span><span class="no">• ${no.length} proses</span>${na.length?`<span class="na">– ${na.length} tidak ada</span>`:""}<span class="upd">Diperbarui ${esc(e.savedAt)}</span></div>
+      <div class="cnt"><span class="ok">✓ ${ok.length} selesai</span><span class="no">• ${no.length} proses</span>${na.length?`<span class="na">– ${na.length} tidak ada</span>`:""}</div>
+      <div class="cnt"><span class="upd" style="margin-left:0">Diperbarui ${esc(e.savedAt)}</span></div>
       <div class="egal"${openEv.has(e.id)?"":" hidden"}>${evGallery(u,items)}</div>
-      <details><summary>Lihat rincian</summary>${grp("Selesai",ok,"ok")}${grp("Proses",no,"no")}${grp("Tidak ada di event ini",na,"na")}${nts}</details></div>
-      <span class="pill ${e.percent===100?"full":""}">${e.percent}%</span></article>`;
+      <details><summary>Lihat rincian</summary>${grp("Selesai",ok,"ok")}${grp("Proses",no,"no")}${grp("Tidak ada di event ini",na,"na")}${nts}</details></div></article>`;
   });
   box.innerHTML=out;
 }
@@ -1353,7 +1361,7 @@ $("rowFile").addEventListener("change",async()=>{
 });
 /* ---------- form khusus SERTIFIKAT & PIAGAM ---------- */
 const CERT_JENIS=["Sertifikat","Piagam Penghargaan"];
-const CERT_UNTUK=["Peserta","Panitia","Guru Pembimbing","Sekolah Peduli Prestasi","Piagam Penghargaan Peserta dan Juara Umum"];
+const CERT_UNTUK=["Peserta","Panitia","Guru Pembimbing","Sekolah Peduli Prestasi","Piagam Penghargaan Peserta","Piagam Penghargaan Juara Umum"];
 const blankCert=()=>({jenis:"",untuk:"",no:"",jj:""}), blankTtd=()=>({img:"",n:"",jab:""});
 const fmtDN=s=>{ const d=dayOf(s); return d?d.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"}):""; };
 function buildCertForm(){
