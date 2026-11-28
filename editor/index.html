@@ -1034,6 +1034,7 @@ function feedCard(d){
     <div class="pdet">${d.note?`<pre class="inst"><b>Instruksi Drafter:</b> ${esc(d.note)}</pre>`:""}
     ${d.text?`<pre><b>Draft text:</b> ${esc(d.text)}</pre>`:""}
     ${d.link?docBlock(d):""}${d.video?videoHtml(d):""}${fotoBlock(d)}
+    ${role==="admin"?statusBar(d):""}
     <div class="acts"><button data-a="gopl" data-pid="${d.id}">Buka di Content Plan</button><button data-a="copy">Salin link</button></div></div></div>`;
 }
 function renderDraf(){
@@ -1533,7 +1534,7 @@ $("dList").addEventListener("click",e=>{
   if(a==="copyr"){ const v=b.dataset.v||"", t0=b.textContent; copyText(v).then(()=>{ toast("Disalin ✓"); b.textContent="✓ Tersalin"; setTimeout(()=>{ b.textContent=t0; },1300); }); return; }
   if(a==="copyb"){ copyText(d.cert?certText(d):flyerText(d)).then(()=>toast("Brief flyer disalin")); return; }
   if(a==="copy"){ const ls=draftLinks(d); copyText(ls.length?ls.join("\n"):d.link).then(()=>toast(ls.length>1?"Semua link draf disalin":"Link draf disalin")); return; }
-  if(a==="status"){ if(role==="admin") setStatus(d,b.dataset.v); return; }
+  if(a==="status"){ if(role==="admin"){ if(d.fromPlan){ const pp=plans.find(x=>x.id===d.id); if(pp) setPlanStatus(pp,{proses:"In Progress",siap:"Done",batal:"Cancel"}[b.dataset.v]); } else setStatus(d,b.dataset.v); } return; }
   if(role!=="drafter") return;
   if(a==="edit"){
     editId=d.id; setJenis(d.jenis); { const ls=draftLinks(d); setLinkRows(ls.length?ls:(d.link?[d.link]:[])); } setFormOpen(true); setFlyer(d.flyer,d.cert?[]:d.fotos); setCert(d.cert,d.cert?d.fotos:[]); renderJChips(); $("dDl").value=String(d.deadline||"").slice(0,10); $("dPicIn").value=d.pic||"";
@@ -1819,12 +1820,12 @@ $("pSave").addEventListener("click",()=>{
 function setPlanStatus(p,s){
   if(role!=="admin"||p.status===s||!EDITOR_ST.includes(s)) return;
   const old={status:p.status,done:p.done};
-  p.status=s; p.done=DONE_KEYS.includes(skey(s))?(p.done||todayIso()):""; renderPlan();
+  p.status=s; p.done=DONE_KEYS.includes(skey(s))?(p.done||todayIso()):""; renderDP();
   api({action:"cp_status",id:p.id,status:s}).then(r=>{
     if(typeof r.done!=="string") throw new Error("Unexpected token");
-    p.done=r.done; renderPlan(); toast("Status diubah: "+s+(r.done?" · tanggal selesai "+fmtD(r.done):"")+" ✓"); if(r.done) loadStats(true);
+    p.done=r.done; renderDP(); toast("Status diubah: "+s+(r.done?" · tanggal selesai "+fmtD(r.done):"")+" ✓"); if(r.done) loadStats(true);
   }).catch(e=>{
-    console.error("cp_status",e); p.status=old.status; p.done=old.done; renderPlan();
+    console.error("cp_status",e); p.status=old.status; p.done=old.done; renderDP();
     toast("Gagal mengubah status: "+(/Unexpected token|JSON/i.test(String(e.message))?"Apps Script belum di-deploy versi baru":errMsg(e)),6000);
   });
 }
@@ -1873,7 +1874,7 @@ function applyRole(){
   bellPrev=-1; bellOpen=false; refreshBell(); loadStats();
   if(role==="admin"&&view!=="draf"&&view!=="plan"){ getDraf(); getPlan(); }
   $("who").querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{ location.href=b.dataset.go; }));
-  clearInterval(poller); if(role) poller=setInterval(()=>{ if(role==="viewer") pull(); if(role==="admin"||view==="draf"||view==="plan"){ getDraf(); getPlan(); } },30000);
+  clearInterval(poller); if(role) poller=setInterval(()=>{ loadStats(true); if(role==="viewer") pull(); if(role==="admin"||view==="draf"||view==="plan"){ getDraf(); getPlan(); } },30000);
   renderAll();
 }
 function logout(){
@@ -1911,8 +1912,8 @@ const BADGE_METAL=["Perunggu","Perak","Emas","Safir","Berlian"];
 const BADGE_C=[["#f0b778","#9a5b1c"],["#e5e7eb","#6b7280"],["#fde047","#b45309"],["#7dd3fc","#1d4ed8"],["#f0abfc","#7e22ce"]];
 const BADGE_N={admin:["Editor Pemula","Editor Terampil","Editor Andal","Editor Ahli","Editor Legenda"],drafter:["Drafter Pemula","Drafter Terampil","Drafter Andal","Drafter Ahli","Drafter Legenda"]};
 const ROLE_LABEL={admin:"Editor",drafter:"Drafter"};
-const BADGE_HOW={admin:"Setiap desain yang kamu tandai Siap dan setiap konten yang kamu tandai Done dihitung satu kali.",drafter:"Setiap draf desain dan setiap konten baru yang kamu buat dihitung satu kali."};
-const BADGE_BY={admin:[["siap-desain","Desain Siap"],["done-konten","Konten Done"]],drafter:[["buat-draf","Draf desain"],["buat-konten","Konten"]]};
+const BADGE_HOW={admin:"Dihitung dari jumlah desain dan konten (Feed maupun Reel) yang kamu selesaikan, yaitu saat statusnya Siap / Done. Satu item dihitung satu kali.",drafter:"Dihitung dari draf desain yang kamu buat, draf Feed dari Content Plan, dan Reel buatanmu yang sudah berstatus Siap / Done. Satu item dihitung satu kali."};
+const BADGE_BY={admin:[["siap-desain","Desain Siap"],["done-konten","Konten Done"]],drafter:[["buat-draf","Draf desain"],["buat-konten","Draf Feed"],["konten-siap","Reel Siap"]]};
 const cap=s=>s?s.charAt(0).toUpperCase()+s.slice(1):"";
 const tierOf=n=>BADGE_T.reduce((t,v,i)=>n>=v?i:t,-1);
 const badgeName=(r,t)=>t<0||!BADGE_N[r]?"Belum ada lencana":BADGE_N[r][t];
